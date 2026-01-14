@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Mail, MapPin, FileText, Users, CheckCircle, ChevronDown, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, FileText, Users, CheckCircle, ChevronDown, Calendar, Banknote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AdmisionSectionProps {
@@ -116,7 +116,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
       'Users': <Users className="w-8 h-8" />,
       'Calendar': <Calendar className="w-8 h-8" />,
       'CheckCircle': <CheckCircle className="w-8 h-8" />,
-      'DollarSign': <DollarSign className="w-8 h-8" />,
+      'Banknote': <Banknote className="w-8 h-8" />,
       'Mail': <Mail className="w-8 h-8" />
     };
     return iconMap[iconName] || <FileText className="w-8 h-8" />;
@@ -139,7 +139,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     {
       id: 1,
       title: 'Proceso de Admisión',
-      description: 'Conoce los pasos a seguir para postular al Colegio Sagrada Familia. Un proceso transparente y orientado a conocer a tu familia.',
+      description: 'Conoce los pasos a seguir para postular al Colegio Sagrada Familia.',
       icon: <FileText className="w-12 h-12" />,
       color: 'from-blue-600 to-blue-800',
       image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop'
@@ -147,7 +147,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     {
       id: 2,
       title: 'Proyecto Educativo',
-      description: 'Formación integral basada en valores schoenstatianos. Educación de excelencia académica y humana para tus hijos.',
+      description: 'Formación católica integral y de excelencia orientada al servicio.',
       icon: <Users className="w-12 h-12" />,
       color: 'from-blue-600 to-blue-800',
       image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=400&h=300&fit=crop'
@@ -155,7 +155,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     {
       id: 3,
       title: 'Comunidad Educativa',
-      description: 'Únete a una comunidad comprometida con la formación integral. Familias que comparten valores y visión educativa.',
+      description: 'Familias que comparten valores y cultivan una atmósfera de vínculos sólidos, de confianza y libertad.',
       icon: <CheckCircle className="w-12 h-12" />,
       color: 'from-blue-600 to-blue-800',
       image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=300&fit=crop'
@@ -257,7 +257,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
               Admisión
             </h1>
-            <p className="text-lg text-gray-600">Tu familia es bienvenida a nuestra comunidad educativa</p>
+            <p className="text-2xl font-semibold text-blue-600">¡Bienvenidos al Colegio Sagrada Familia!</p>
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
               className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-blue-600 flex-shrink-0"
             >
               <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold">¿Por qué elegirnos?</span>
+              <span className="font-semibold">Nuestros sellos educativos</span>
             </button>
             
             <button
@@ -312,7 +312,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
         <div id="por-que-elegirnos" className={`mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="text-center mb-6">
             <h2 className="text-4xl font-semibold text-[#2E3A87] mb-2">
-              ¿Por qué elegirnos?
+              Nuestros sellos educativos
             </h2>
             <div className="w-48 h-1 bg-[#8B5E3C] mx-auto rounded"></div>
           </div>

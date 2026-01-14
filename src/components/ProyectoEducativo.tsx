@@ -67,7 +67,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
             Volver al inicio
           </button>
           <h1 className={`text-4xl md:text-5xl font-bold text-gray-900 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            Proyecto Educativo
+            Organización del Colegio
           </h1>
         </div>
       </div>
@@ -99,14 +99,6 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
               <Target className="w-5 h-5" />
               <span className="font-semibold">Coordinadores de Ciclo</span>
             </button>
-            
-            <button
-              onClick={() => scrollToSection('pastoral')}
-              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-red-600 flex-shrink-0"
-            >
-              <Heart className="w-5 h-5" />
-              <span className="font-semibold">Pastoral</span>
-            </button>
           </div>
         </div>
       </div>
@@ -119,14 +111,14 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
                 <BookOpen className="w-8 h-8 text-blue-600" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Vicerrectoría Académica y de Formación</h2>
+              <h2 className="text-3xl font-bold text-white">Vicerrectoría Académica</h2>
             </div>
           </div>
 
           <div className="p-8 md:p-12">
             <div className="mb-8">
               <p className="text-gray-700 leading-relaxed text-lg">
-                La Vicerrectoría Académica y de Formación lidera el desarrollo educativo del colegio, trabajando en conjunto con los jefes de departamento para ofrecer una educación integral de excelencia. Nuestro objetivo es acompañar a cada estudiante en su proceso de aprendizaje, ayudándolos a descubrir y desarrollar sus talentos al máximo.
+                La Vicerrectoría Académica lidera el desarrollo educativo del colegio, trabajando en conjunto con los jefes de departamento para ofrecer una educación integral de excelencia. Nuestro objetivo es acompañar a cada estudiante en su proceso de aprendizaje, ayudándolos a descubrir y desarrollar sus talentos al máximo.
               </p>
             </div>
 
@@ -217,52 +209,6 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
                       </div>
                       <p className="text-gray-800 font-semibold mt-2 md:mt-0">{coordinator.coordinator_name}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Pastoral del Colegio */}
-        <div id="pastoral" className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-1000 delay-400 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <Heart className="w-8 h-8 text-red-600" />
-              </div>
-              <h2 className="text-3xl font-bold text-white">Pastoral del Colegio</h2>
-            </div>
-          </div>
-
-          <div className="p-8 md:p-12">
-            <div className="space-y-6 mb-8">
-              <p className="text-gray-700 leading-relaxed">
-                La pastoral de nuestro colegio brinda caminos concretos para hacer vida la espiritualidad del Colegio en diversos espacios formativos.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Para los alumnos ofrece instancias para facilitar la vivencia de la fe en el camino al encuentro personal y comunitario con Jesús y con María, en momentos de oración y capilla, clases de religión, catequesis, misiones, trabajo social, hitos formativos y diversas celebraciones litúrgicas, integrando el mundo natural y sobrenatural de nuestros niños y jóvenes.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Para los padres, apoderados y para profesores, la pastoral ofrece catequesis, jornadas de formación, reflexión y retiros. Además realiza actividades para motivar el compromiso social, con la finalidad de acompañar la vida de cada integrante.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Para trabajar cada uno de estos objetivos, la Pastoral cuenta con diversos equipos, quienes, a su vez, son acompañados por los Capellanes del Colegio.
-              </p>
-            </div>
-
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <Users className="w-7 h-7 text-red-600 mr-3" />
-              Equipo Pastoral
-            </h3>
-            {loading ? (
-              <p className="text-center text-gray-600 py-4">Cargando...</p>
-            ) : (
-              <div className="flex flex-wrap gap-3">
-                {pastoralTeam.map((member, index) => (
-                  <div key={member.id} className="bg-gradient-to-r from-red-50 to-white px-4 py-3 rounded-full border border-red-200 shadow-sm hover:shadow-md transition-shadow">
-                    <span className="text-gray-800 font-medium">{member.name}</span>
-                    {index < pastoralTeam.length - 1 && <span className="text-gray-400 ml-2">•</span>}
                   </div>
                 ))}
               </div>

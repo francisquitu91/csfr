@@ -19,6 +19,8 @@ import VicerretoriaFormacionSection from './components/VicerretoriaFormacionSect
 import InstitutionalDocuments from './components/InstitutionalDocuments';
 import InstitutionalDocumentsManagement from './components/InstitutionalDocumentsManagement';
 import CEALSection from './components/CEALSection';
+import FamiliaSection from './components/FamiliaSection';
+import EducadoresSection from './components/EducadoresSection';
 import PastoralJuvenilSection from './components/PastoralJuvenilSection';
 import CEALManagement from './components/CEALManagement';
 import PastoralManagement from './components/PastoralManagement';
@@ -51,12 +53,11 @@ import PlanLectorSection from './components/PlanLectorSection';
 import PlanLectorManagement from './components/PlanLectorManagement';
 
 const backgroundImages = [
-  'https://i.postimg.cc/RhTGPj0c/wqwedq.jpg',
-  'https://i.postimg.cc/TPc92jTK/DSC00144.jpg',
-  'https://i.postimg.cc/pV1mjskv/dqdqsz.jpg',
-  'https://i.postimg.cc/WbBtWtQw/dadada.jpg',
-  'https://i.postimg.cc/LshbW0t1/qfrq.jpg',
-  'https://i.postimg.cc/mgW23JHX/DSC00500.jpg'
+  'https://i.postimg.cc/63qmNSkN/Vinculos.jpg',
+  'https://i.postimg.cc/VNDVp1Hn/Santuario.jpg',
+  'https://i.postimg.cc/jSYmJM7R/Infraestructura.jpg',
+  'https://i.postimg.cc/kMZk7JMV/Deporte.jpg',
+  'https://i.postimg.cc/XJYTYXC6/Cicloinicial1.jpg'
 ];
 
 function App() {
@@ -137,6 +138,14 @@ function App() {
 
   if (currentPage === 'ceal') {
     return <CEALSection onBack={handleBackToHome} />;
+  }
+
+  if (currentPage === 'familia') {
+    return <FamiliaSection onBack={handleBackToHome} />;
+  }
+
+  if (currentPage === 'educadores') {
+    return <EducadoresSection onBack={handleBackToHome} />;
   }
 
   if (currentPage === 'pastoral-juvenil') {
@@ -316,11 +325,11 @@ function App() {
         <main className="px-8 md:px-12 lg:px-16">
           <div className="text-left max-w-4xl">
             <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight tracking-wide drop-shadow-lg">
-              ¿POR QUÉ ELEGIR<br />SAGRADA FAMILIA?
+              Colegio Sagrada Familia
             </h1>
             
             <p className="text-white text-base md:text-lg lg:text-xl mb-6 leading-relaxed font-medium max-w-2xl drop-shadow-md">
-              EDUCACIÓN PERSONALIZADA – PADRES, PRIMEROS EDUCADORES – PROFESORES COMPROMETIDOS
+              Formamos personas íntegras, comprometidas con Cristo y orientadas al servicio.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
@@ -397,20 +406,20 @@ function App() {
             {/* Right Image */}
             <div className="relative">
               <div className="relative">
-                {/* Decorative blue circle background */}
-                <div className="absolute -top-6 -right-6 w-72 h-72 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20"></div>
+                {/* Decorative red square background */}
+                <div className="absolute -top-6 -right-6 w-72 h-72 bg-gradient-to-br from-red-400 to-red-600 opacity-20"></div>
                 
-                {/* Main image with circular crop */}
-                <div className="relative w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl">
+                {/* Main image with square crop */}
+                <div className="relative w-80 h-80 mx-auto overflow-hidden shadow-2xl rounded-lg">
                   <img
-                    src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2024/10/padre-victor-misa-1030x438.jpg"
-                    alt="Padre Victor celebrando misa"
-                    className="w-full h-full object-cover object-center scale-110"
+                    src="https://i.postimg.cc/9FgP60Wc/Quienessomos.jpg"
+                    alt="Colegio Sagrada Familia"
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
                 
                 {/* Additional decorative elements */}
-                <div className="absolute -bottom-3 -left-3 w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full opacity-30 -z-10"></div>
+                <div className="absolute -bottom-3 -left-3 w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 opacity-30 -z-10"></div>
               </div>
             </div>
           </div>

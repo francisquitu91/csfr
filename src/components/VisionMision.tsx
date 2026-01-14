@@ -84,7 +84,7 @@ const VisionMision: React.FC<VisionMisionProps> = ({ onBack }) => {
           <div className="flex justify-center lg:justify-start">
             <div className="w-full max-w-md">
               <img
-                src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2018/08/foto-mision-vision.jpg"
+                src="https://i.postimg.cc/mgGMfH06/Vision.jpg"
                 alt="Padre José Kentenich con niño"
                 className="w-full h-auto object-cover rounded-lg shadow-lg"
               />

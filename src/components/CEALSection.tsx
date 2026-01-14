@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Users, ChevronLeft, ChevronRight, BookOpen, Award } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface CEALSectionProps {
@@ -27,10 +27,6 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setIsVisible(true);
@@ -69,51 +65,24 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
 
   const nextPhoto = () => {
     setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % photos.length);
-    resetZoom();
   };
 
   const prevPhoto = () => {
     setCurrentPhotoIndex((prevIndex) => (prevIndex - 1 + photos.length) % photos.length);
-    resetZoom();
   };
 
-  const resetZoom = () => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  };
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY * -0.001;
-    const newZoom = Math.min(Math.max(1, zoom + delta), 3);
-    setZoom(newZoom);
-    if (newZoom === 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoom > 1) {
-      setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
     }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
   };
 
   return (
@@ -129,24 +98,120 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
             Volver al inicio
           </button>
           <h1 className={`text-4xl md:text-5xl font-bold text-gray-900 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            CEAL - Centro de Alumnos
+            Alumnos
           </h1>
         </div>
       </div>
 
+      {/* Quick Access Navigation */}
+      <div className="sticky top-0 z-40 bg-white shadow-md border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto hide-scrollbar">
+            <button
+              onClick={() => scrollToSection('proyecto-educativo')}
+              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-blue-600 flex-shrink-0"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="font-semibold">Proyecto Educativo</span>
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('ceal-section')}
+              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-purple-600 flex-shrink-0"
+            >
+              <Award className="w-5 h-5" />
+              <span className="font-semibold">CEAL</span>
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('integrantes-ceal')}
+              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-red-600 flex-shrink-0"
+            >
+              <Users className="w-5 h-5" />
+              <span className="font-semibold">Integrantes</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Image Section */}
+      <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <img
+          src="https://i.postimg.cc/R06fLcy9/Manto.jpg"
+          alt="Alumnos del Colegio Sagrada Familia"
+          className="w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="text-center text-white">
+            <img
+              src="https://i.postimg.cc/FN3R296R/1.png"
+              alt="Logo Colegio Sagrada Familia"
+              className="h-28 md:h-36 w-auto mx-auto drop-shadow-2xl"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Proyecto Educativo Section */}
+        <div id="proyecto-educativo" className={`bg-white rounded-lg shadow-lg p-8 mb-12 transition-all duration-1000 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Nuestro Proyecto Educativo: Una Alianza Formativa</h2>
+            <p className="text-gray-700 leading-relaxed mb-6">
+              Educamos bajo el Modelo Pedagógico Kentenijiano (MPK). Nuestro enfoque se centra en el crecimiento integral de la persona a través de tres pilares fundamentales: <strong>Vida Interior, Comunidad y Mundo</strong>.
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border-l-4 border-blue-600">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfil del Alumno:</h3>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              Buscamos formar personas con una vida interior rica y auténtica, capaces de liderar con espíritu de servicio.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Excelencia Orgánica:</h4>
+                  <p className="text-gray-700">Cultivan sus talentos únicos con dedicación, buscando un desarrollo que trasciende lo académico.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Vínculo Espiritual:</h4>
+                  <p className="text-gray-700">Encuentran en Cristo y María la inspiración y fortaleza para vivir con propósito.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Autonomía y Autoeducación:</h4>
+                  <p className="text-gray-700">Son responsables de su propio aprendizaje, forjando un carácter auténtico y comprometido.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Liderazgo Solidario:</h4>
+                  <p className="text-gray-700">Se reconocen como agentes de cambio que ponen sus capacidades al servicio del bien común y la transformación social.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CEAL Section */}
+        <div id="ceal-section" className={`bg-white rounded-lg shadow-lg p-8 mb-12 transition-all duration-1000 delay-200 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">CEAL - Centro de Alumnos</h2>
+        
         {/* Photo Carousel */}
         {photos.length > 0 && (
-          <div className={`relative mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div 
-              className="relative rounded-xl overflow-hidden shadow-2xl bg-gray-100"
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-              style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-            >
+          <div className="relative mb-8">
+            <div className="relative rounded-xl overflow-hidden shadow-2xl bg-gray-100">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
@@ -157,12 +222,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
                   <img
                     src={photo.photo_url}
                     alt={`CEAL ${index + 1}`}
-                    className="w-full h-auto object-contain select-none"
-                    draggable={false}
-                    style={{
-                      transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.1s ease-out'
-                    }}
+                    className="w-full h-auto object-contain"
                   />
                 </div>
               ))}
@@ -191,7 +251,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
                   {photos.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => { setCurrentPhotoIndex(index); resetZoom(); }}
+                      onClick={() => setCurrentPhotoIndex(index)}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         index === currentPhotoIndex ? 'bg-white w-8' : 'bg-white/50'
                       }`}
@@ -204,8 +264,8 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
         )}
 
         {/* CEAL 2025 Content */}
-        <div className={`bg-white rounded-lg shadow-lg p-8 mb-12 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <h2 className="text-3xl font-bold text-blue-900 mb-6 text-center">Centro de Alumnos 2025</h2>
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-blue-900 mb-4 text-center">Centro de Alumnos 2025</h3>
           
           <div className="space-y-4 text-gray-700 leading-relaxed">
             <p>
@@ -238,11 +298,11 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
         </div>
 
         {/* Members Grid */}
-        <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="flex items-center justify-center mb-8">
+        <div id="integrantes-ceal" className="mt-8 scroll-mt-24">
+          <div className="flex items-center justify-center mb-6">
             <div className="flex items-center space-x-3">
               <Users className="w-8 h-8 text-blue-600" />
-              <h2 className="text-3xl font-bold text-gray-900">Integrantes CEAL 2025</h2>
+              <h3 className="text-2xl font-bold text-gray-900">Integrantes CEAL 2025</h3>
             </div>
           </div>
 
@@ -250,7 +310,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
             {members.map((member, index) => (
               <div
                 key={member.id}
-                className={`bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 delay-${(index % 4) * 100}`}
+                className="bg-gradient-to-br from-blue-50 to-white rounded-lg shadow-md p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 <div className="text-center">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -262,6 +322,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
     </div>

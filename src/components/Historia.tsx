@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Users, MapPin, Award } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, MapPin, Award, BookOpen } from 'lucide-react';
 import DirectoryCarousel, { DirectoryItem } from './DirectoryCarousel';
 import FlipCard from './FlipCard';
 import { supabase } from '../lib/supabase';
@@ -8,6 +8,94 @@ import type { DirectoryMember } from '../lib/supabase';
 interface HistoriaProps {
   onBack: () => void;
 }
+
+// Componente para las tarjetas de Sellos Educativos
+const SelloCard: React.FC<{ title: string; description: string; image?: string }> = ({ title, description, image }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <div 
+      className="flip-card h-64 cursor-pointer"
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}>
+        {/* Front */}
+        <div className="flip-card-front rounded-lg shadow-xl flex items-center justify-center p-6 overflow-hidden relative">
+          {image ? (
+            <>
+              <img src={image} alt={title} className="w-full h-full object-cover absolute inset-0" />
+              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700"></div>
+          )}
+          <h4 className="text-2xl font-bold text-white text-center relative z-10 drop-shadow-lg">{title}</h4>
+        </div>
+        {/* Back */}
+        <div className="flip-card-back bg-white rounded-lg shadow-xl p-6 flex items-center justify-center border-4 border-red-600">
+          <p className="text-gray-700 text-center leading-relaxed text-xs">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Componente para la tarjeta del Padre Kentenich con PEI
+const PEICard: React.FC = () => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <div 
+      className="flip-card h-[32rem] cursor-pointer"
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}>
+        {/* Front - Foto del Padre Kentenich con overlay */}
+        <div className="flip-card-front rounded-lg shadow-xl overflow-hidden relative">
+          {/* Imagen de fondo */}
+          <img
+            src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2018/08/foto-mision-vision.jpg"
+            alt="Padre José Kentenich"
+            className="w-full h-full object-cover"
+          />
+          {/* Overlay oscuro */}
+          <div className="absolute inset-0 bg-black/20"></div>
+          
+          {/* Contenido overlay */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+            <div className="transform transition-transform duration-300 hover:scale-110 relative w-full flex flex-col items-center">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 md:mb-6 shadow-lg flex-shrink-0">
+                <BookOpen className="w-10 h-10 md:w-12 md:h-12 text-blue-600" />
+              </div>
+              <h3 className="text-2xl md:text-4xl font-bold text-center mb-3 md:mb-4 drop-shadow-lg text-white">Proyecto Educativo</h3>
+              <div className="flex items-center justify-center space-x-2 text-white/90 animate-pulse drop-shadow-md text-xs md:text-sm">
+                <span className="font-semibold">Haz clic para descubrir</span>
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Back - Acceso al PEI */}
+        <div className="flip-card-back bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-xl p-8 flex flex-col items-center justify-center">
+          <BookOpen className="w-16 h-16 text-white mb-4" />
+          <h4 className="text-2xl font-bold text-white text-center mb-4">Proyecto Educativo</h4>
+          <p className="text-white text-center mb-6 opacity-90">Conoce nuestro Proyecto Educativo Institucional</p>
+          <a
+            href="https://drive.google.com/file/d/1Md8klWWoGqQO1IiaQDaG9uKH2BIJbK7O/view?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Ver Documento PEI
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
   const [activeTimeline, setActiveTimeline] = useState(0);
@@ -69,34 +157,28 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
 
   const timelineEvents = [
     {
-      year: '1992',
-      title: 'Fundación del Colegio',
-      description: 'Inicia sus actividades a partir del Jardín Infantil Jesus´Heart en Reñaca, Viña del Mar. Nace como una iniciativa apostólica donde sacerdotes y laicos se unieron para servir a la comunidad desde el ámbito educativo. El proyecto educativo se fundamenta en los principios pedagógicos del Padre José Kentenich, fundador del Movimiento de Schoenstatt, buscando formar integralmente a los estudiantes en un ambiente familiar y cristiano.',
+      year: '1998',
+      title: 'Inicios del Colegio',
+      description: 'El Colegio inicia sus actividades cuando un grupo de laicos y sacerdotes unieron sus esfuerzos para hacerse cargo del colegio Jesus´Heart, como una iniciativa apostólica orientada a aportar a la comunidad desde el ámbito de la educación bajo la espiritualidad de Schoenstatt y la pedagogía del padre José Kentenich.',
       icon: <Calendar className="w-6 h-6" />
     },
     {
-      year: '1994',
-      title: 'Sistema Coeducacional',
-      description: 'Se incorporan los hombres implementándose el sistema coeducacional, marcando un hito importante en la historia del colegio. Esta decisión permitió que hermanos y hermanas pudieran educarse juntos, fortaleciendo los valores familiares y la complementariedad entre géneros. El sistema coeducacional se alineó perfectamente con la pedagogía de Schoenstatt, que valora la originalidad de cada persona desde su modalidad femenina o masculina.',
-      icon: <Users className="w-6 h-6" />
-    },
-    {
-      year: '1997',
-      title: 'Nueva Ubicación',
-      description: 'Se traslada a su actual ubicación en el sector Los Pinos de Reñaca, estableciéndose en un campus especialmente diseñado para la educación integral. Las nuevas instalaciones permitieron expandir la oferta educativa y mejorar significativamente la infraestructura. Este traslado representó un crecimiento importante en la capacidad de atención a estudiantes y en la calidad de los espacios educativos, deportivos y recreativos.',
-      icon: <MapPin className="w-6 h-6" />
-    },
-    {
-      year: '1998',
-      title: 'Coronación de María',
-      description: 'El 15 de agosto de 1998, el Directorio coronó a la Virgen María como Madre, Reina y Educadora del Colegio, consagrando y comprometiéndose con María en el cuidado, protección y desarrollo de la comunidad educativa. Este acto solemne marcó profundamente la identidad del colegio, estableciendo a María como el corazón de la propuesta educativa y como modelo de educadora para toda la comunidad escolar.',
+      year: '15 de Agosto 1998',
+      title: 'Consagración a la Virgen María',
+      description: 'En un acto religioso, el Directorio le pidió a la Virgen María que fuese Madre, Reina y Educadora del Colegio, consagrándole el cuidado, protección y desarrollo de la comunidad educativa. Este acto solemne marcó profundamente la identidad del colegio, estableciendo a María como el corazón de la propuesta educativa.',
       icon: <Award className="w-6 h-6" />
     },
     {
       year: '1999',
-      title: 'Coronación como Colegio',
-      description: 'Se realizó la coronación como colegio, agradeciendo la conducción que María había tenido desde los inicios y reconociendo la magnitud de la misión educativa encomendada. En este momento histórico, la comunidad educativa reconoció su pequeñez y debilidad en contraste con la grandeza de María, pero también asumió con valentía el compromiso de formar integralmente a las nuevas generaciones bajo su maternal protección.',
+      title: 'Reconocimiento como Colegio',
+      description: 'Se realizó un acto similar, esta vez como Colegio, agradeciendo la conducción que la Virgen María había tenido del colegio desde sus inicios hasta entonces, y reconociendo la magnitud de la misión que les encargaba. La comunidad educativa asumió con valentía el compromiso de formar integralmente a las nuevas generaciones bajo su maternal protección.',
       icon: <Award className="w-6 h-6" />
+    },
+    {
+      year: '2001',
+      title: 'Colegio Sagrada Familia',
+      description: 'El Colegio recibe el nombre de Colegio Sagrada Familia, reflejando la centralidad de la comunidad educativa en el proceso de formación, donde el niño se desarrolla en un verdadero ambiente de hogar, creando vínculos reales de amor y responsabilidad consigo mismo, con Dios, con las personas y las cosas. El nombre destaca la relevancia del padre y de la madre como primeros educadores, quienes, a imagen de la Sagrada Familia, son los principales responsables de la educación de sus hijos, haciéndolo con alegría. En ese mismo año, egresa la primera generación conformada por 6 alumnas del Colegio.',
+      icon: <Users className="w-6 h-6" />
     }
   ];
 
@@ -158,18 +240,12 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
       </div>
 
       {/* Hero Image Section */}
-      <div className={`relative h-[500px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
-          src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2022/03/Historia.jpg"
+          src="https://i.postimg.cc/8z934gtQ/25anos.jpg"
           alt="Historia del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-          <div className="text-center text-white">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Más de 30 años educando</h2>
-            <p className="text-xl">Formando líderes desde 1992</p>
-          </div>
-        </div>
       </div>
 
       {/* Interactive Timeline */}
@@ -225,21 +301,16 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
           <div className="p-8 md:p-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Visión & Misión</h2>
             
-            {/* Vision y Mision Flip Cards with Image */}
+            {/* Vision y Mision Flip Cards with Padre Kentenich Image */}
             <div className="grid lg:grid-cols-2 gap-8 items-center mb-12">
-              {/* Image */}
+              {/* Image Padre Kentenich con PEI */}
               <div className="relative order-2 lg:order-1">
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-                  <img
-                    src="https://i.postimg.cc/j2G7Cj6J/foto-mision-vision.jpg"
-                    alt="Visión y Misión"
-                    className="w-full h-auto transform hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                <PEICard />
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-500 italic">
+                    💡 Haz clic en la tarjeta para acceder al Proyecto Educativo
+                  </p>
                 </div>
-                {/* Decorative elements */}
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-200 rounded-full opacity-20 blur-2xl"></div>
-                <div className="absolute -top-4 -left-4 w-24 h-24 bg-red-200 rounded-full opacity-20 blur-2xl"></div>
               </div>
 
               {/* Flip Cards */}
@@ -258,37 +329,25 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
               </div>
             </div>
 
-            {/* Instruction hint */}
-            <div className="text-center mb-8">
-              <p className="text-sm text-gray-500 italic flex items-center justify-center space-x-2">
-                <span>💡</span>
-                <span>Haz clic en las tarjetas para ver el contenido completo</span>
-              </p>
-            </div>
-
-            {/* Objetivos Section */}
-            <div id="objetivos" className="mt-12 scroll-mt-24">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Objetivos Educacionales</h3>
-              <div className="space-y-4">
-                {[
-                  { titulo: 'Educar en la vivencia de la fe', descripcion: 'Para poder vivir en consecuencia con ella, como hijo de Dios y miembro de su familia, la Iglesia, integrando el mundo natural con el sobrenatural.' },
-                  { titulo: 'Educar a la persona para que llegue a ser plenamente ella misma', descripcion: 'Según el Plan de Dios, desde su modalidad femenina o masculina, a través de personas que presten un servicio desinteresado a la originalidad de cada alumno.' },
-                  { titulo: 'Educar en comunidad', descripcion: 'Sustentándose en vínculos sólidos a personas, ideas y lugares (curso, colegio, familia e Iglesia).' },
-                  { titulo: 'Educar para la excelencia', descripcion: 'De modo que cada alumno (a) desarrolle con el máximo esfuerzo todas sus potencialidades cognitivas, afectivas y valóricas, para asumir responsablemente su misión en la familia y en la sociedad.' },
-                  { titulo: 'Educar para servir en la sociedad', descripcion: 'Conociéndola desde su realidad social y ética, para que reconozcan en ella las necesidades, como posibilidad de respuesta personal y construcción de un nuevo orden social inspirado en valores cristianos y en la doctrina social de la Iglesia.' }
-                ].map((objetivo, index) => (
-                  <div key={index} className="bg-white border-l-4 border-blue-600 p-4 rounded-r-lg shadow-md">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">{objetivo.titulo}</h4>
-                        <p className="text-gray-700 text-sm">{objetivo.descripcion}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            {/* Sellos Educativos Section */}
+            <div id="sellos" className="mt-12 scroll-mt-24">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Sellos Educativos</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <SelloCard
+                  title="Ideal Personal"
+                  description="Bajo el carisma de Schoenstatt, promovemos que cada estudiante descubra y desarrolle su originalidad, plasmada en su Ideal Personal como propósito y vocación de vida."
+                  image="https://i.postimg.cc/SxdLQ6Yz/ideapersonl.png"
+                />
+                <SelloCard
+                  title="Ser Orgánico"
+                  description="Siguiendo la pedagogía de Schoenstatt, creemos que un desarrollo orgánico que integre las dimensiones intelectual, emocional y espiritual, es clave para que los estudiantes alcancen su potencial y se conviertan en agentes de cambio social."
+                  image="https://i.postimg.cc/MGwLNm2V/rezar.png"
+                />
+                <SelloCard
+                  title="Estilo Mariano"
+                  description="Reconocemos en María, Madre de Jesús y Corredentora, nuestra Madre, quien nos ofrece un camino para encontrarnos con su Hijo Jesús. Inspirados en la espiritualidad de Schoenstatt y en los hitos que dieron origen a nuestro colegio, surge un vínculo personal con María quien regala permanentemente a nuestra comunidad tres gracias desde su Santuario: el acogimiento, la transformación y el envío apostólico."
+                  image="https://i.postimg.cc/sX74rtY1/iglesia.png"
+                />
               </div>
             </div>
           </div>
@@ -297,7 +356,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
         {/* Statistics Cards */}
         <div className={`grid md:grid-cols-3 gap-6 mt-12 transition-all duration-1000 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
-            <div className="text-3xl font-bold text-red-600 mb-2">30+</div>
+            <div className="text-3xl font-bold text-red-600 mb-2">25+</div>
             <div className="text-gray-700">Años de Historia</div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
@@ -305,7 +364,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
             <div className="text-gray-700">Estudiantes Actuales</div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
-            <div className="text-3xl font-bold text-red-600 mb-2">14+</div>
+            <div className="text-3xl font-bold text-red-600 mb-2">12+</div>
             <div className="text-gray-700">Generaciones Egresadas</div>
           </div>
         </div>

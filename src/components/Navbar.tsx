@@ -27,8 +27,8 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       href: '#',
       dropdown: [
         'QUIÉNES SOMOS',
-        'PROYECTO EDUCATIVO',
-        'ÁREA ACADÉMICA',
+        'ORG. DEL COLEGIO',
+        'ACLES',
         'TOUR VIRTUAL',
         'FORMACIÓN',
         'DOCUMENTOS INSTITUCIONALES'
@@ -38,8 +38,10 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       name: 'COMUNIDAD ESCOLAR',
       href: '#',
       dropdown: [
-        'CEAL',
-        'PASTORAL JUVENIL',
+        'ALUMNOS',
+        'EDUCADORES',
+        'FAMILIA',
+        'PASTORAL',
         'ANUARIOS',
         'RECURSOS DIGITALES',
         'FUNDACIÓN PENTÉCOSTES'
@@ -71,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'PROYECTO EDUCATIVO') {
+    } else if (itemName === 'ORG. DEL COLEGIO') {
       onPageChange('proyecto-educativo');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
@@ -86,12 +88,27 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'CEAL') {
+    } else if (itemName === 'ALUMNOS') {
       onPageChange('ceal');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'PASTORAL JUVENIL') {
+    } else if (itemName === 'PROFESORES') {
+      onPageChange('profesores');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
+    } else if (itemName === 'EDUCADORES') {
+      onPageChange('educadores');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
+    } else if (itemName === 'FAMILIA') {
+      onPageChange('familia');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
+    } else if (itemName === 'PASTORAL') {
       onPageChange('pastoral-juvenil');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
@@ -161,11 +178,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'VICERRECTORÍA DE FORMACIÓN') {
-      onPageChange('vicerrectoria-formacion');
-      setActiveDropdown(null);
-      setActiveSubDropdown(null);
-      setIsMenuOpen(false);
     } else if (itemName === 'GESTIÓN DE NOTICIAS') {
       onPageChange('news-management');
       setActiveDropdown(null);
@@ -201,10 +213,10 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-red-600/85 backdrop-blur-lg shadow-lg ${
       isScrolled 
-        ? 'bg-red-600/85 backdrop-blur-lg shadow-lg' 
-        : ''
+        ? 'lg:bg-red-600/85 lg:backdrop-blur-lg lg:shadow-lg' 
+        : 'lg:bg-transparent lg:backdrop-blur-none lg:shadow-none'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
   <div className="flex justify-between items-center h-20">
@@ -251,34 +263,14 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                         <div key={subItem} className="relative">
                           <button
                             onClick={() => handleMenuClick(subItem)}
-                            onMouseEnter={() => (subItem === 'ÁREA ACADÉMICA' || subItem === 'FORMACIÓN') ? setActiveSubDropdown(subItem) : setActiveSubDropdown(null)}
+                            onMouseEnter={() => subItem === 'FORMACIÓN' ? setActiveSubDropdown(subItem) : setActiveSubDropdown(null)}
                             className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200 border-b border-gray-200 last:border-b-0"
                           >
                             {subItem}
-                            {(subItem === 'ÁREA ACADÉMICA' || subItem === 'FORMACIÓN') && (
+                            {subItem === 'FORMACIÓN' && (
                               <ChevronDown className="ml-1 h-4 w-4 rotate-[-90deg]" />
                             )}
                           </button>
-                          
-                          {/* Sub-dropdown for Área Académica */}
-                          {subItem === 'ÁREA ACADÉMICA' && (
-                            <div
-                              className={`absolute left-full top-0 w-60 bg-white shadow-lg border border-gray-200 transition-all duration-200 ${
-                                activeSubDropdown === 'ÁREA ACADÉMICA' ? 'opacity-100 visible' : 'opacity-0 invisible'
-                              }`}
-                              onMouseEnter={() => setActiveSubDropdown('ÁREA ACADÉMICA')}
-                              onMouseLeave={() => setActiveSubDropdown(null)}
-                            >
-                              <div className="py-2">
-                                <button
-                                  onClick={() => handleMenuClick('ACLES')}
-                                  className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
-                                >
-                                  ACLES
-                                </button>
-                              </div>
-                            </div>
-                          )}
                           {/* Plan Lector mobile options */}
                           {subItem === 'DOCUMENTOS INSTITUCIONALES' && activeSubDropdown === 'DOCUMENTOS INSTITUCIONALES' && (
                             <div className="pl-4 space-y-1">
@@ -309,12 +301,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                               <div className="py-2">
                                 <button
                                   onClick={() => handleMenuClick('DEPARTAMENTO DE ORIENTACIÓN')}
-                                  className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200 border-b border-gray-200"
-                                >
-                                  DEPARTAMENTO DE ORIENTACIÓN
-                                </button>
-                                <button
-                                  onClick={() => handleMenuClick('VICERRECTORÍA DE FORMACIÓN')}
                                   className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
                                 >
                                   VICERRECTORÍA DE FORMACIÓN
@@ -361,11 +347,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
           <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`transition-colors duration-300 focus:outline-none ${
-                isScrolled 
-                  ? 'text-white hover:text-red-200 focus:text-red-200' 
-                  : 'text-white hover:text-red-300 focus:text-red-300'
-              }`}
+              className="text-white hover:text-red-200 focus:text-red-200 transition-colors duration-300 focus:outline-none"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -377,9 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
         </div>
         
   {/* Horizontal line delimiter: full width */}
-  <div className={`absolute bottom-0 left-0 right-0 h-px transition-colors duration-300 ${
-    isScrolled ? 'bg-white/20' : 'bg-white/30'
-  }`}></div>
+  <div className="absolute bottom-0 left-0 right-0 h-px bg-white/20 lg:bg-white/30 transition-colors duration-300 lg:bg-opacity-0 lg:group-hover:bg-opacity-100"></div>
       </div>
 
       {/* Mobile Menu */}
@@ -408,11 +388,11 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                     {item.dropdown.map((subItem) => (
                       <div key={subItem}>
                         <button
-                          onClick={() => (subItem === 'ÁREA ACADÉMICA' || subItem === 'FORMACIÓN') ? setActiveSubDropdown(activeSubDropdown === subItem ? null : subItem) : handleMenuClick(subItem)}
+                          onClick={() => subItem === 'FORMACIÓN' ? setActiveSubDropdown(activeSubDropdown === subItem ? null : subItem) : handleMenuClick(subItem)}
                           className="flex items-center justify-between w-full text-left px-3 py-2 text-sm text-gray-200 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
                         >
                           {subItem}
-                          {(subItem === 'ÁREA ACADÉMICA' || subItem === 'FORMACIÓN') && (
+                          {subItem === 'FORMACIÓN' && (
                             <ChevronDown 
                               className={`h-4 w-4 transition-transform duration-200 ${
                                 activeSubDropdown === subItem ? 'rotate-180' : ''
@@ -420,18 +400,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                             />
                           )}
                         </button>
-
-                        {/* Mobile Sub-dropdown for Área Académica */}
-                        {subItem === 'ÁREA ACADÉMICA' && activeSubDropdown === 'ÁREA ACADÉMICA' && (
-                          <div className="pl-4 space-y-1">
-                            <button
-                              onClick={() => handleMenuClick('ACLES')}
-                              className="block w-full text-left px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
-                            >
-                              ACLES
-                            </button>
-                          </div>
-                        )}
 
                         {/* Mobile Sub-dropdown for Formación */}
                         {subItem === 'FORMACIÓN' && activeSubDropdown === 'FORMACIÓN' && (
@@ -441,12 +409,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                               className="block w-full text-left px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
                             >
                               DEPARTAMENTO DE ORIENTACIÓN
-                            </button>
-                            <button
-                              onClick={() => handleMenuClick('VICERRECTORÍA DE FORMACIÓN')}
-                              className="block w-full text-left px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
-                            >
-                              VICERRECTORÍA DE FORMACIÓN
                             </button>
                           </div>
                         )}

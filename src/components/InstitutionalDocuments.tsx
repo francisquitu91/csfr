@@ -27,8 +27,8 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
 
   const categories = [
     { id: 'all', name: 'Todos', color: 'blue' },
-    { id: 'Documentos de Matrícula 2026', name: 'Matrícula 2026', color: 'green' },
     { id: 'Documentos, protocolos y reglamentos del Colegio', name: 'Protocolos y Reglamentos', color: 'purple' },
+    { id: 'Documentos de Matrícula 2026', name: 'Matrícula 2026', color: 'green' },
     { id: 'Seguros escolares', name: 'Seguros Escolares', color: 'orange' },
     { id: 'Otros', name: 'Otros', color: 'gray' }
   ];
@@ -105,6 +105,17 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
     return acc;
   }, {} as Record<string, Document[]>);
 
+  // Define el orden de las categorías
+  const categoryOrder = [
+    'Documentos, protocolos y reglamentos del Colegio',
+    'Documentos de Matrícula 2026',
+    'Seguros escolares',
+    'Otros'
+  ];
+
+  // Ordenar las categorías según el orden definido
+  const sortedCategories = categoryOrder.filter(cat => groupedDocuments[cat]);
+
   const getCategoryColor = (category: string) => {
     const cat = categories.find(c => c.id === category);
     return cat?.color || 'gray';
@@ -158,13 +169,14 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
         ) : (
           /* Documents by Category */
           <div className="space-y-8">
-            {Object.keys(groupedDocuments).length === 0 ? (
+            {sortedCategories.length === 0 ? (
               <div className="bg-white rounded-lg shadow-md p-12 text-center">
                 <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 text-lg">No hay documentos disponibles en esta categoría</p>
               </div>
             ) : (
-              Object.entries(groupedDocuments).map(([category, docs], index) => {
+              sortedCategories.map((category, index) => {
+                const docs = groupedDocuments[category];
                 const color = getCategoryColor(category);
                 return (
                   <div

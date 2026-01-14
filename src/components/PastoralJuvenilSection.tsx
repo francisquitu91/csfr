@@ -26,17 +26,20 @@ interface Photo {
   order_index: number;
 }
 
+interface PastoralTeamMember {
+  id: string;
+  name: string;
+  order_index: number;
+}
+
 const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack }) => {
   const [coreMembers, setCoreMembers] = useState<CoreMember[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [pastoralTeam, setPastoralTeam] = useState<PastoralTeamMember[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setIsVisible(true);
@@ -56,19 +59,22 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
     try {
       setLoading(true);
       
-      const [coreMembersData, teachersData, photosData] = await Promise.all([
+      const [coreMembersData, teachersData, photosData, pastoralTeamData] = await Promise.all([
         supabase.from('pastoral_core_members').select('*').order('order_index'),
         supabase.from('pastoral_teachers').select('*').order('order_index'),
-        supabase.from('pastoral_photos').select('*').order('order_index')
+        supabase.from('pastoral_photos').select('*').order('order_index'),
+        supabase.from('pastoral_team').select('*').order('order_index')
       ]);
 
       if (coreMembersData.error) throw coreMembersData.error;
       if (teachersData.error) throw teachersData.error;
       if (photosData.error) throw photosData.error;
+      if (pastoralTeamData.error) throw pastoralTeamData.error;
 
       setCoreMembers(coreMembersData.data || []);
       setTeachers(teachersData.data || []);
       setPhotos(photosData.data || []);
+      setPastoralTeam(pastoralTeamData.data || []);
     } catch (error) {
       console.error('Error fetching Pastoral data:', error);
     } finally {
@@ -78,51 +84,10 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
 
   const nextPhoto = () => {
     setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % photos.length);
-    resetZoom();
   };
 
   const prevPhoto = () => {
     setCurrentPhotoIndex((prevIndex) => (prevIndex - 1 + photos.length) % photos.length);
-    resetZoom();
-  };
-
-  const resetZoom = () => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY * -0.001;
-    const newZoom = Math.min(Math.max(1, zoom + delta), 3);
-    setZoom(newZoom);
-    if (newZoom === 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoom > 1) {
-      setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
   };
 
   return (
@@ -138,24 +103,62 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
             Volver al inicio
           </button>
           <h1 className={`text-4xl md:text-5xl font-bold text-gray-900 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            Pastoral Juvenil
+            Pastoral
           </h1>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Pastoral del Colegio Section */}
+        <div className={`bg-white rounded-lg shadow-lg overflow-hidden mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                <Heart className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-white">Pastoral del Colegio</h2>
+            </div>
+          </div>
+
+          <div className="p-8 md:p-12">
+            <div className="space-y-6 mb-8">
+              <p className="text-gray-700 leading-relaxed">
+                La pastoral de nuestro colegio brinda caminos concretos para hacer vida la espiritualidad del Colegio en diversos espacios formativos.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Para los alumnos ofrece instancias para facilitar la vivencia de la fe en el camino al encuentro personal y comunitario con Jesús y con María, en momentos de oración y capilla, clases de religión, catequesis, misiones, trabajo social, hitos formativos y diversas celebraciones litúrgicas, integrando el mundo natural y sobrenatural de nuestros niños y jóvenes.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Para los padres, apoderados y para profesores, la pastoral ofrece catequesis, jornadas de formación, reflexión y retiros. Además realiza actividades para motivar el compromiso social, con la finalidad de acompañar la vida de cada integrante.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Para trabajar cada uno de estos objetivos, la Pastoral cuenta con diversos equipos, quienes, a su vez, son acompañados por los Capellanes del Colegio.
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <Heart className="w-7 h-7 text-red-600 mr-3" />
+              Equipo Pastoral
+            </h3>
+            {loading ? (
+              <p className="text-center text-gray-600 py-4">Cargando...</p>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                {pastoralTeam.map((member, index) => (
+                  <div key={member.id} className="bg-gradient-to-r from-red-50 to-white px-4 py-3 rounded-full border border-red-200 shadow-sm hover:shadow-md transition-shadow">
+                    <span className="text-gray-800 font-medium">{member.name}</span>
+                    {index < pastoralTeam.length - 1 && <span className="text-gray-400 ml-2">•</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Photo Carousel */}
         {photos.length > 0 && (
           <div className={`relative mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div 
-              className="relative rounded-xl overflow-hidden shadow-2xl bg-gray-100"
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-              style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-            >
+            <div className="relative rounded-xl overflow-hidden shadow-2xl bg-gray-100">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
@@ -166,12 +169,7 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
                   <img
                     src={photo.photo_url}
                     alt={`Pastoral ${index + 1}`}
-                    className="w-full h-auto object-contain select-none"
-                    draggable={false}
-                    style={{
-                      transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.1s ease-out'
-                    }}
+                    className="w-full h-auto object-contain"
                   />
                 </div>
               ))}
