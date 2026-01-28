@@ -57,7 +57,8 @@ const backgroundImages = [
   'https://i.postimg.cc/VNDVp1Hn/Santuario.jpg',
   'https://i.postimg.cc/jSYmJM7R/Infraestructura.jpg',
   'https://i.postimg.cc/kMZk7JMV/Deporte.jpg',
-  'https://i.postimg.cc/XJYTYXC6/Cicloinicial1.jpg'
+  'https://i.postimg.cc/XJYTYXC6/Cicloinicial1.jpg',
+  'https://i.postimg.cc/gkBwggKs/dad.jpg'
 ];
 
 function App() {
