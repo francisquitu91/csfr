@@ -80,3 +80,26 @@ export interface PastoralTeamMember {
   created_at: string;
   updated_at: string;
 }
+
+export interface FormacionConvivenciaMember {
+  id: string;
+  name: string;
+  position: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdmisionInfoSection {
+  id: number;
+  title: string;
+  content: string;
+  icon_name: string;
+  color: string;
+  order_index: number;
+  file_url?: string | null;
+  file_name?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

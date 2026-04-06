@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import type { DepartmentHead, OrientationTeamMember, CycleCoordinator, PastoralTeamMember } from '../lib/supabase';
+import type { DepartmentHead, OrientationTeamMember, CycleCoordinator, FormacionConvivenciaMember } from '../lib/supabase';
 
 interface ProyectoEducativoManagementProps {
   onBack: () => void;
 }
 
-type Section = 'departmentHeads' | 'orientationTeam' | 'cycleCoordinators' | 'pastoralTeam';
+type Section = 'departmentHeads' | 'orientationTeam' | 'formacionConvivenciaTeam' | 'cycleCoordinators';
 
 const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = ({ onBack }) => {
   const [activeSection, setActiveSection] = useState<Section>('departmentHeads');
   const [departmentHeads, setDepartmentHeads] = useState<DepartmentHead[]>([]);
   const [orientationTeam, setOrientationTeam] = useState<OrientationTeamMember[]>([]);
+  const [formacionConvivenciaTeam, setFormacionConvivenciaTeam] = useState<FormacionConvivenciaMember[]>([]);
   const [cycleCoordinators, setCycleCoordinators] = useState<CycleCoordinator[]>([]);
-  const [pastoralTeam, setPastoralTeam] = useState<PastoralTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -28,17 +28,17 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
 
   const fetchAllData = async () => {
     try {
-      const [deptHeads, orientTeam, cycleCoords, pastTeam] = await Promise.all([
+      const [deptHeads, orientTeam, formConvivTeam, cycleCoords] = await Promise.all([
         supabase.from('department_heads').select('*').order('order_index', { ascending: true }),
         supabase.from('orientation_team').select('*').order('order_index', { ascending: true }),
+        supabase.from('formacion_convivencia_team').select('*').order('order_index', { ascending: true }),
         supabase.from('cycle_coordinators').select('*').order('order_index', { ascending: true }),
-        supabase.from('pastoral_team').select('*').order('order_index', { ascending: true })
       ]);
 
       if (deptHeads.data) setDepartmentHeads(deptHeads.data);
       if (orientTeam.data) setOrientationTeam(orientTeam.data);
+      if (formConvivTeam.data) setFormacionConvivenciaTeam(formConvivTeam.data);
       if (cycleCoords.data) setCycleCoordinators(cycleCoords.data);
-      if (pastTeam.data) setPastoralTeam(pastTeam.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -66,8 +66,8 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
     const tableMap = {
       departmentHeads: 'department_heads',
       orientationTeam: 'orientation_team',
-      cycleCoordinators: 'cycle_coordinators',
-      pastoralTeam: 'pastoral_team'
+      formacionConvivenciaTeam: 'formacion_convivencia_team',
+      cycleCoordinators: 'cycle_coordinators'
     };
 
     const { error } = await supabase.from(tableMap[section]).delete().eq('id', id);
@@ -84,8 +84,8 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
     const tableMap = {
       departmentHeads: 'department_heads',
       orientationTeam: 'orientation_team',
-      cycleCoordinators: 'cycle_coordinators',
-      pastoralTeam: 'pastoral_team'
+      formacionConvivenciaTeam: 'formacion_convivencia_team',
+      cycleCoordinators: 'cycle_coordinators'
     };
 
     const table = tableMap[activeSection];
@@ -198,7 +198,7 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
                 type="text"
                 value={formData.cycle_name || ''}
                 onChange={(e) => setFormData({ ...formData, cycle_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="Ej: Ciclo Inicial"
               />
             </div>
@@ -208,7 +208,7 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
                 type="text"
                 value={formData.grade_range || ''}
                 onChange={(e) => setFormData({ ...formData, grade_range: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="Ej: 1º a 3º Básico"
               />
             </div>
@@ -218,7 +218,7 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
                 type="text"
                 value={formData.coordinator_name || ''}
                 onChange={(e) => setFormData({ ...formData, coordinator_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="Ej: Ana García"
               />
             </div>
@@ -228,13 +228,13 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
                 type="number"
                 value={formData.order_index || 0}
                 onChange={(e) => setFormData({ ...formData, order_index: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </>
         );
 
-      case 'pastoralTeam':
+      case 'formacionConvivenciaTeam':
         return (
           <>
             <div className="mb-4">
@@ -244,7 +244,17 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Ej: Padre Juan Silva"
+                placeholder="Ej: Daniela Fuentes"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">Cargo</label>
+              <input
+                type="text"
+                value={formData.position || ''}
+                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Ej: Coordinadora General de Convivencia Educativa"
               />
             </div>
             <div className="mb-4">
@@ -346,6 +356,18 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
         )}
 
         {renderSection(
+          'Formación y convivencia',
+          formacionConvivenciaTeam,
+          'formacionConvivenciaTeam',
+          (item: FormacionConvivenciaMember) => (
+            <div>
+              <span className="font-semibold">{item.name}</span>
+              <span className="text-gray-600 text-sm ml-2">- {item.position}</span>
+            </div>
+          )
+        )}
+
+        {renderSection(
           'Coordinadores de Ciclo',
           cycleCoordinators,
           'cycleCoordinators',
@@ -354,17 +376,6 @@ const ProyectoEducativoManagement: React.FC<ProyectoEducativoManagementProps> = 
               <span className="font-semibold">{item.cycle_name}</span>
               <span className="text-gray-600 text-sm ml-2">({item.grade_range})</span>
               <span className="text-gray-700 ml-2">- {item.coordinator_name}</span>
-            </div>
-          )
-        )}
-
-        {renderSection(
-          'Equipo Pastoral',
-          pastoralTeam,
-          'pastoralTeam',
-          (item: PastoralTeamMember) => (
-            <div>
-              <span className="font-semibold">{item.name}</span>
             </div>
           )
         )}

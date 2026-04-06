@@ -26,7 +26,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
     },
     {
       id: 'proyecto-educativo-management',
-      title: 'Gestión Proyecto Educativo',
+      title: 'Gestión de Organización',
       description: 'Administrar contenido del proyecto educativo',
       icon: <BookOpen className="w-8 h-8" />,
       color: 'bg-orange-600 hover:bg-orange-700',
@@ -143,14 +143,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
       icon: <Bell className="w-8 h-8" />,
       color: 'bg-red-600 hover:bg-red-700',
       iconBg: 'bg-red-100 text-red-600'
-    },
-    {
-      id: 'departamento-orientacion-management',
-      title: 'Dpto. de Orientación',
-      description: 'Administrar equipo y contenido de orientación',
-      icon: <Users className="w-8 h-8" />,
-      color: 'bg-blue-600 hover:bg-blue-700',
-      iconBg: 'bg-blue-100 text-blue-600'
     }
   ];
 

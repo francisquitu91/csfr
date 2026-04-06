@@ -1,147 +1,229 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, Upload, FileText, Trash2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Save, X, UtensilsCrossed, CalendarDays, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface CasinoManagementProps {
   onBack: () => void;
 }
 
-interface CasinoDocument {
-  id?: number;
+interface MenuSettings {
+  id: number;
   title: string;
-  file_url: string;
-  file_type: string;
+  display_month: number;
+  display_year: number;
+  concessionaria_nombre: string | null;
+  concessionaria_telefono: string | null;
+  concessionaria_email: string | null;
+  nutricionista_nombre: string | null;
+  nutricionista_telefono: string | null;
 }
 
+interface MenuItem {
+  id?: number;
+  menu_year: number;
+  menu_month: number;
+  menu_date: string;
+  menu_text: string;
+  price: number | null;
+}
+
+const monthNames = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+const formatDateKey = (date: Date) => {
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, '0');
+  const d = `${date.getDate()}`.padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const generateWeekdays = (month: number, year: number) => {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0);
+  const result: string[] = [];
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const day = d.getDay();
+    if (day >= 1 && day <= 5) {
+      result.push(formatDateKey(d));
+    }
+  }
+
+  return result;
+};
+
 const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
-  const [documento, setDocumento] = useState<CasinoDocument | null>(null);
+  const [settings, setSettings] = useState<MenuSettings>({
+    id: 1,
+    title: `Menú ${monthNames[new Date().getMonth()]} ${new Date().getFullYear()}`,
+    display_month: new Date().getMonth() + 1,
+    display_year: new Date().getFullYear(),
+    concessionaria_nombre: '',
+    concessionaria_telefono: '',
+    concessionaria_email: '',
+    nutricionista_nombre: '',
+    nutricionista_telefono: ''
+  });
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
-    fetchDocumento();
+    fetchData();
   }, []);
 
-  const fetchDocumento = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('casino_menu')
+      const settingsRes = await supabase
+        .from('casino_menu_settings')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('id', 1)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      if (data) setDocumento(data);
+      if (settingsRes.error && settingsRes.error.code !== 'PGRST116') throw settingsRes.error;
+
+      const resolvedSettings = settingsRes.data || settings;
+      setSettings(resolvedSettings);
+
+      const itemsRes = await supabase
+        .from('casino_menu_items')
+        .select('*')
+        .eq('menu_year', resolvedSettings.display_year)
+        .eq('menu_month', resolvedSettings.display_month)
+        .order('menu_date', { ascending: true });
+
+      if (itemsRes.error) throw itemsRes.error;
+      setMenuItems(itemsRes.data || []);
     } catch (error) {
-      console.error('Error fetching documento:', error);
+      console.error('Error fetching casino calendar data:', error);
+      setMessage('Error al cargar el menú editable');
     } finally {
       setLoading(false);
     }
   };
 
-  const uploadFile = async (file: File): Promise<{ url: string; type: string }> => {
-    const fileExt = file.name.split('.').pop()?.toLowerCase();
-    const fileName = `casino/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('casino-files')
-      .upload(fileName, file);
+  const sortedItems = useMemo(
+    () => [...menuItems].sort((a, b) => (a.menu_date > b.menu_date ? 1 : -1)),
+    [menuItems]
+  );
 
-    if (uploadError) throw uploadError;
+  const loadMonthItems = async (month: number, year: number) => {
+    const { data, error } = await supabase
+      .from('casino_menu_items')
+      .select('*')
+      .eq('menu_year', year)
+      .eq('menu_month', month)
+      .order('menu_date', { ascending: true });
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('casino-files')
-      .getPublicUrl(fileName);
-
-    const fileType = fileExt === 'pdf' ? 'pdf' : 'image';
-    return { url: publicUrl, type: fileType };
+    if (error) throw error;
+    setMenuItems(data || []);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-    if (!validTypes.includes(file.type)) {
-      setMessage('Solo se permiten archivos PDF, PNG o JPG');
-      return;
-    }
-
-    setUploadingFile(true);
+  const handleGenerateWorkdays = async () => {
     try {
-      const { url, type } = await uploadFile(file);
-      setDocumento(prev => ({
-        ...prev,
-        title: prev?.title || 'Menú Casino',
-        file_url: url,
-        file_type: type
-      }));
-      setMessage('Archivo subido exitosamente');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      setMessage('Error al subir archivo');
-    } finally {
-      setUploadingFile(false);
-    }
-  };
+      const dates = generateWeekdays(settings.display_month, settings.display_year);
+      const existing = new Set(menuItems.map((item) => item.menu_date));
 
-  const handleSave = async () => {
-    if (!documento || !documento.file_url) {
-      setMessage('Por favor sube un archivo primero');
-      return;
-    }
+      const missing = dates
+        .filter((date) => !existing.has(date))
+        .map((date) => ({
+          menu_year: settings.display_year,
+          menu_month: settings.display_month,
+          menu_date: date,
+          menu_text: '',
+          price: null
+        }));
 
-    setLoading(true);
-    try {
-      // Delete old document if exists
-      if (documento.id) {
-        await supabase.from('casino_menu').delete().neq('id', 0);
-      } else {
-        await supabase.from('casino_menu').delete().neq('id', 0);
+      if (missing.length > 0) {
+        const { error } = await supabase.from('casino_menu_items').insert(missing);
+        if (error) throw error;
       }
 
-      // Insert new document
-      const { error } = await supabase
-        .from('casino_menu')
-        .insert([{
-          title: documento.title,
-          file_url: documento.file_url,
-          file_type: documento.file_type
-        }]);
-
-      if (error) throw error;
-      setMessage('Menú actualizado exitosamente');
-      fetchDocumento();
+      await loadMonthItems(settings.display_month, settings.display_year);
+      setMessage('Días hábiles generados correctamente');
     } catch (error) {
-      console.error('Error saving documento:', error);
-      setMessage('Error al guardar menú');
-    } finally {
-      setLoading(false);
+      console.error('Error generating workdays:', error);
+      setMessage('Error al generar días hábiles');
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de eliminar el menú actual?')) return;
-
-    setLoading(true);
+  const handleSaveSettings = async () => {
+    setSaving(true);
     try {
-      await supabase.from('casino_menu').delete().neq('id', 0);
-      setDocumento(null);
-      setMessage('Menú eliminado');
+      const payload = {
+        ...settings,
+        id: 1
+      };
+
+      const { error } = await supabase
+        .from('casino_menu_settings')
+        .upsert(payload, { onConflict: 'id' });
+
+      if (error) throw error;
+
+      await loadMonthItems(settings.display_month, settings.display_year);
+      setMessage('Configuración del menú guardada');
     } catch (error) {
-      console.error('Error deleting documento:', error);
-      setMessage('Error al eliminar menú');
+      console.error('Error saving settings:', error);
+      setMessage('Error al guardar la configuración');
     } finally {
-      setLoading(false);
+      setSaving(false);
+    }
+  };
+
+  const handleSaveItems = async () => {
+    setSaving(true);
+    try {
+      const payload = sortedItems.map((item) => ({
+        id: item.id,
+        menu_year: settings.display_year,
+        menu_month: settings.display_month,
+        menu_date: item.menu_date,
+        menu_text: item.menu_text || '',
+        price: item.price ?? null
+      }));
+
+      const { error } = await supabase
+        .from('casino_menu_items')
+        .upsert(payload, { onConflict: 'menu_year,menu_month,menu_date' });
+
+      if (error) throw error;
+
+      await loadMonthItems(settings.display_month, settings.display_year);
+      setMessage('Calendario de menú guardado');
+    } catch (error) {
+      console.error('Error saving menu items:', error);
+      setMessage('Error al guardar los días del menú');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteItem = async (item: MenuItem) => {
+    if (!item.id) return;
+    try {
+      const { error } = await supabase
+        .from('casino_menu_items')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      setMenuItems((prev) => prev.filter((i) => i.id !== item.id));
+      setMessage('Día eliminado');
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      setMessage('Error al eliminar día');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={onBack}
           className="flex items-center text-blue-600 hover:text-blue-700 transition-all duration-300 mb-8 group"
@@ -150,9 +232,29 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
           Volver al panel de administración
         </button>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Menú Casino</h1>
-          <p className="text-gray-600">Sube el menú actual del casino (PDF o imagen)</p>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <UtensilsCrossed className="w-10 h-10 text-orange-600" /> Gestión de Menú Casino
+            </h1>
+            <p className="text-gray-600">Calendario editable mensual, sin subir Word/PDF.</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleSaveSettings}
+              disabled={saving || loading}
+              className="bg-orange-600 text-white px-5 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              <Save className="w-5 h-5" /> Guardar configuración
+            </button>
+            <button
+              onClick={handleSaveItems}
+              disabled={saving || loading}
+              className="bg-indigo-600 text-white px-5 py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              <Save className="w-5 h-5" /> Guardar calendario
+            </button>
+          </div>
         </div>
 
         {message && (
@@ -164,105 +266,181 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-6">Menú Actual</h2>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600"></div>
+            <p className="mt-4 text-gray-600">Cargando menú editable...</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white rounded-xl shadow p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">
+                <CalendarDays className="w-6 h-6 text-orange-600" /> Configuración General
+              </h2>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Título
-              </label>
-              <input
-                type="text"
-                value={documento?.title || 'Menú Casino'}
-                onChange={(e) => setDocumento(prev => ({ ...prev!, title: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                placeholder="Ej: Menú Semanal Casino"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Archivo del Menú (PDF, PNG o JPG)
-              </label>
-              <label className="cursor-pointer">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-orange-500 transition-colors">
-                  <div className="flex flex-col items-center justify-center space-y-3 text-gray-600">
-                    <Upload className="w-12 h-12" />
-                    <span className="text-lg">
-                      {uploadingFile ? 'Subiendo...' : 'Haz clic para subir archivo'}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      PDF, PNG o JPG (máx. 10MB)
-                    </span>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div className="md:col-span-5">
+                  <label className="block text-sm text-gray-600 mb-1">Título</label>
+                  <input
+                    type="text"
+                    value={settings.title}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  />
                 </div>
-                <input
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  disabled={uploadingFile}
-                />
-              </label>
-            </div>
-
-            {documento?.file_url && (
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2 text-green-600">
-                    <FileText className="w-5 h-5" />
-                    <span className="font-medium">Archivo cargado</span>
-                  </div>
-                  <a
-                    href={documento.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 text-sm underline"
+                <div className="md:col-span-3">
+                  <label className="block text-sm text-gray-600 mb-1">Mes visible</label>
+                  <select
+                    value={settings.display_month}
+                    onChange={async (e) => {
+                      const month = Number(e.target.value);
+                      setSettings((prev) => ({ ...prev, display_month: month }));
+                      await loadMonthItems(month, settings.display_year);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                   >
-                    Ver archivo
-                  </a>
+                    {monthNames.map((month, idx) => (
+                      <option key={month} value={idx + 1}>{month}</option>
+                    ))}
+                  </select>
                 </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm text-gray-600 mb-1">Año</label>
+                  <input
+                    type="number"
+                    value={settings.display_year}
+                    onChange={async (e) => {
+                      const year = Number(e.target.value);
+                      setSettings((prev) => ({ ...prev, display_year: year }));
+                      if (!Number.isNaN(year) && year > 1990) {
+                        await loadMonthItems(settings.display_month, year);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm text-gray-600 mb-1">Acción</label>
+                  <button
+                    onClick={handleGenerateWorkdays}
+                    className="w-full px-3 py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Generar días
+                  </button>
+                </div>
+              </div>
 
-                {documento.file_type === 'pdf' ? (
-                  <iframe
-                    src={documento.file_url}
-                    className="w-full h-96 border border-gray-300 rounded"
-                    title="Vista previa"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Concesionaria nombre</label>
+                  <input
+                    type="text"
+                    value={settings.concessionaria_nombre || ''}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_nombre: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Concesionaria teléfono</label>
+                  <input
+                    type="text"
+                    value={settings.concessionaria_telefono || ''}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_telefono: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Concesionaria correo</label>
+                  <input
+                    type="email"
+                    value={settings.concessionaria_email || ''}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_email: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Nutricionista nombre</label>
+                  <input
+                    type="text"
+                    value={settings.nutricionista_nombre || ''}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, nutricionista_nombre: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Nutricionista teléfono</label>
+                  <input
+                    type="text"
+                    value={settings.nutricionista_telefono || ''}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, nutricionista_telefono: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold mb-5">Días del Menú ({monthNames[settings.display_month - 1]} {settings.display_year})</h2>
+
+              <div className="space-y-4">
+                {sortedItems.length > 0 ? (
+                  sortedItems.map((item) => (
+                    <div key={item.menu_date} className="border border-gray-200 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div className="md:col-span-2">
+                          <label className="block text-sm text-gray-600 mb-1">Fecha</label>
+                          <input
+                            type="date"
+                            value={item.menu_date}
+                            onChange={(e) => setMenuItems((prev) => prev.map((it) => it.menu_date === item.menu_date ? { ...it, menu_date: e.target.value } : it))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <div className="md:col-span-8">
+                          <label className="block text-sm text-gray-600 mb-1">Contenido (usa Enter para separar líneas)</label>
+                          <textarea
+                            value={item.menu_text}
+                            onChange={(e) => setMenuItems((prev) => prev.map((it) => it.menu_date === item.menu_date ? { ...it, menu_text: e.target.value } : it))}
+                            className="w-full min-h-[92px] px-3 py-2 border border-gray-300 rounded-lg"
+                            placeholder={'Salad Bar\nPlato principal\nPostre'}
+                          />
+                        </div>
+                        <div className="md:col-span-1">
+                          <label className="block text-sm text-gray-600 mb-1">Precio</label>
+                          <input
+                            type="number"
+                            value={item.price ?? ''}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setMenuItems((prev) => prev.map((it) =>
+                                it.menu_date === item.menu_date
+                                  ? { ...it, price: value === '' ? null : Number(value) }
+                                  : it
+                              ));
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <div className="md:col-span-1 flex items-end">
+                          <button
+                            onClick={() => handleDeleteItem(item)}
+                            className="w-full px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <img
-                    src={documento.file_url}
-                    alt="Vista previa"
-                    className="w-full h-auto max-h-96 object-contain rounded"
-                  />
+                  <div className="text-center py-8 text-gray-500">
+                    No hay días para este mes. Usa Generar días.
+                  </div>
                 )}
               </div>
-            )}
-
-            <div className="flex space-x-4">
-              <button
-                onClick={handleSave}
-                disabled={loading || uploadingFile || !documento?.file_url}
-                className="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                <Save className="w-5 h-5" />
-                <span>{loading ? 'Guardando...' : 'Guardar Menú'}</span>
-              </button>
-              
-              {documento?.id && (
-                <button
-                  onClick={handleDelete}
-                  disabled={loading}
-                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                >
-                  <Trash2 className="w-5 h-5" />
-                  <span>Eliminar</span>
-                </button>
-              )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

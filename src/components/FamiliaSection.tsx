@@ -70,7 +70,7 @@ const FamiliaSection: React.FC<FamiliaSectionProps> = ({ onBack }) => {
       {/* Hero Image Section */}
       <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
-          src="https://cdn.prod.website-files.com/6620da2d02ffa63c31d36ced/6620da2d02ffa63c31d37273_Juntos%20somos%20una%20gran%20familia%20padres%20de%20familia%20y%20escuela.png"
+          src="https://i.postimg.cc/4ydG93sb/foto-familia-1.jpg"
           alt="Familias del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-center"
         />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Menu, X, Instagram, Facebook } from 'lucide-react';
+import { ChevronDown, Menu, X, Instagram } from 'lucide-react';
 
 interface NavbarProps {
   onPageChange: (page: string) => void;
@@ -27,10 +27,9 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       href: '#',
       dropdown: [
         'QUIÉNES SOMOS',
-        'ORG. DEL COLEGIO',
+        'ORGANIZACIÓN',
         'ACLES',
         'TOUR VIRTUAL',
-        'FORMACIÓN',
         'DOCUMENTOS INSTITUCIONALES'
       ]
     },
@@ -73,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'ORG. DEL COLEGIO') {
+    } else if (itemName === 'ORGANIZACIÓN') {
       onPageChange('proyecto-educativo');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
@@ -263,13 +262,9 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                         <div key={subItem} className="relative">
                           <button
                             onClick={() => handleMenuClick(subItem)}
-                            onMouseEnter={() => subItem === 'FORMACIÓN' ? setActiveSubDropdown(subItem) : setActiveSubDropdown(null)}
                             className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200 border-b border-gray-200 last:border-b-0"
                           >
                             {subItem}
-                            {subItem === 'FORMACIÓN' && (
-                              <ChevronDown className="ml-1 h-4 w-4 rotate-[-90deg]" />
-                            )}
                           </button>
                           {/* Plan Lector mobile options */}
                           {subItem === 'DOCUMENTOS INSTITUCIONALES' && activeSubDropdown === 'DOCUMENTOS INSTITUCIONALES' && (
@@ -286,26 +281,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                               >
                                 GESTIÓN PLAN LECTOR
                               </button>
-                            </div>
-                          )}
-
-                          {/* Sub-dropdown for Formación */}
-                          {subItem === 'FORMACIÓN' && (
-                            <div
-                              className={`absolute left-full top-0 w-72 bg-white shadow-lg border border-gray-200 transition-all duration-200 ${
-                                activeSubDropdown === 'FORMACIÓN' ? 'opacity-100 visible' : 'opacity-0 invisible'
-                              }`}
-                              onMouseEnter={() => setActiveSubDropdown('FORMACIÓN')}
-                              onMouseLeave={() => setActiveSubDropdown(null)}
-                            >
-                              <div className="py-2">
-                                <button
-                                  onClick={() => handleMenuClick('DEPARTAMENTO DE ORIENTACIÓN')}
-                                  className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
-                                >
-                                  VICERRECTORÍA DE FORMACIÓN
-                                </button>
-                              </div>
                             </div>
                           )}
                         </div>
@@ -328,17 +303,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://www.facebook.com/pages/Colegio-Sagrada-Familia-Re%C3%B1aca/170422360190468"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-colors duration-300 ${
-                  isScrolled ? 'text-white hover:text-red-200' : 'text-white hover:text-red-300'
-                }`}
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -388,30 +352,11 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                     {item.dropdown.map((subItem) => (
                       <div key={subItem}>
                         <button
-                          onClick={() => subItem === 'FORMACIÓN' ? setActiveSubDropdown(activeSubDropdown === subItem ? null : subItem) : handleMenuClick(subItem)}
+                          onClick={() => handleMenuClick(subItem)}
                           className="flex items-center justify-between w-full text-left px-3 py-2 text-sm text-gray-200 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
                         >
                           {subItem}
-                          {subItem === 'FORMACIÓN' && (
-                            <ChevronDown 
-                              className={`h-4 w-4 transition-transform duration-200 ${
-                                activeSubDropdown === subItem ? 'rotate-180' : ''
-                              }`} 
-                            />
-                          )}
                         </button>
-
-                        {/* Mobile Sub-dropdown for Formación */}
-                        {subItem === 'FORMACIÓN' && activeSubDropdown === 'FORMACIÓN' && (
-                          <div className="pl-4 space-y-1">
-                            <button
-                              onClick={() => handleMenuClick('DEPARTAMENTO DE ORIENTACIÓN')}
-                              className="block w-full text-left px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
-                            >
-                              DEPARTAMENTO DE ORIENTACIÓN
-                            </button>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -429,15 +374,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                 aria-label="Instagram"
               >
                 <Instagram className="w-6 h-6" />
-              </a>
-              <a
-                href="https://www.facebook.com/pages/Colegio-Sagrada-Familia-Re%C3%B1aca/170422360190468"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-300 transition-colors duration-200"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-6 h-6" />
               </a>
             </div>
           </div>

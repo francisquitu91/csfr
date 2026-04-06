@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Heart, Users, TrendingUp, Globe } from 'lucide-react';
+import { ArrowLeft, BookOpen, Heart, TrendingUp, Globe } from 'lucide-react';
 
 interface EducadoresSectionProps {
   onBack: () => void;
@@ -62,7 +62,7 @@ const EducadoresSection: React.FC<EducadoresSectionProps> = ({ onBack }) => {
       {/* Hero Image Section */}
       <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
-          src="https://static.vecteezy.com/system/resources/previews/021/553/488/non_2x/illustration-with-kids-and-teacher-in-a-classroom-education-illustration-interior-teacher-with-pupils-in-a-classroom-primary-school-kids-children-listen-to-teacher-vector.jpg"
+          src="https://i.postimg.cc/Fsk558RR/educadores.jpg"
           alt="Educadores del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-top"
         />

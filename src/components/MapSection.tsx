@@ -89,7 +89,7 @@ const MapSection: React.FC = () => {
                     <h4 className="font-semibold text-gray-900 mb-1">Contáctenos</h4>
                     <p className="text-gray-600">
                       Información adicional a través de:<br />
-                      <span className="font-medium">Formulario de Contacto</span>
+                      <a href="mailto:secretaria@csfr.cl" className="font-medium text-blue-600 hover:underline">secretaria@csfr.cl</a>
                     </p>
                   </div>
                 </div>
@@ -103,7 +103,6 @@ const MapSection: React.FC = () => {
                     <h4 className="font-semibold text-gray-900 mb-1">Horario de Atención</h4>
                     <div className="text-gray-600 space-y-1">
                       <p>Lunes a Viernes: 8:00 - 17:00</p>
-                      <p>Sábados: 9:00 - 13:00</p>
                       <p>Domingos: Cerrado</p>
                     </div>
                   </div>

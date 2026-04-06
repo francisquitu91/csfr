@@ -83,7 +83,7 @@ const PEICard: React.FC = () => {
           <h4 className="text-2xl font-bold text-white text-center mb-4">Proyecto Educativo</h4>
           <p className="text-white text-center mb-6 opacity-90">Conoce nuestro Proyecto Educativo Institucional</p>
           <a
-            href="https://drive.google.com/file/d/1Md8klWWoGqQO1IiaQDaG9uKH2BIJbK7O/view?usp=sharing"
+            href="https://drive.google.com/file/d/1H67PODGQISpVre6MwWvIFw1csDxU85yo/view"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-300"
@@ -135,14 +135,14 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
       const directorio = (data || [])
         .filter((m: DirectoryMember) => m.category === 'directorio')
         .map((m: DirectoryMember) => ({
-          name: `${m.name} - ${m.position}`,
+          name: `${m.name}, ${m.position}`,
           photoUrl: m.photo_url || 'https://via.placeholder.com/150'
         }));
 
       const rectoria = (data || [])
         .filter((m: DirectoryMember) => m.category === 'rectoria')
         .map((m: DirectoryMember) => ({
-          name: `${m.name} - ${m.position}`,
+          name: `${m.name}, ${m.position}`,
           photoUrl: m.photo_url || 'https://via.placeholder.com/150'
         }));
 
@@ -233,7 +233,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
               className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-red-600 flex-shrink-0"
             >
               <Users className="w-5 h-5" />
-              <span className="font-semibold">Directorio & Rectoría</span>
+              <span className="font-semibold">Directorio y Equipo Directivo</span>
             </button>
           </div>
         </div>
@@ -369,10 +369,10 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
           </div>
         </div>
 
-        {/* Directorio y Rectoría Section */}
+        {/* Directorio y Equipo Directivo Section */}
         <div id="directorio-rectoria" className={`bg-white rounded-lg shadow-lg overflow-hidden mt-12 transition-all duration-1000 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="p-8 md:p-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Directorio y Rectoría</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Directorio y Equipo Directivo</h2>
             
             {/* Directorio Section */}
             <div className="mb-12">
@@ -404,24 +404,12 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
               )}
             </div>
 
-            {/* Rectoría Section */}
+            {/* Equipo Directivo Section */}
             <div>
-              <h3 className="text-2xl font-bold text-red-900 mb-6">Rectoría</h3>
+              <h3 className="text-2xl font-bold text-red-900 mb-6">Equipo Directivo</h3>
               <div className="bg-red-50 p-6 rounded-lg mb-6">
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Queridas familias, nuestro colegio nace como una iniciativa apostólica que anhela contribuir en 
-                  la construcción de una Iglesia nueva y de un Chile nuevo. Animados por la espiritualidad de Schoenstatt, 
-                  quiere ofrecer una propuesta educativa que le permita a sus alumnos crecer armónicamente desde una 
-                  auténtica vivencia de familia.
-                </p>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  El Padre José Kentenich, fundador del movimiento de Schoenstatt, nos llamó a "forjar al hombre nuevo, 
-                  para la nueva comunidad", lo que se presenta como una invitación a formar niños y jóvenes llamados a 
-                  superar una cultura individualista para salir al encuentro de los demás, en quienes el amor se manifieste 
-                  en todo su poder y sean capaces de aportar significativamente en la renovación de nuestra sociedad.
-                </p>
-                <p className="text-gray-700 leading-relaxed italic">
-                  Le pedimos a la Virgen María que nos acompañe y anime en este camino.
+                <p className="text-gray-700 leading-relaxed">
+                  La Vicerrectoría de Formación lidera el desarrollo del sello formativo del colegio, promoviendo en toda la comunidad educativa los valores y principios que inspiran nuestro Proyecto Educativo. En conjunto con los equipos de Pastoral, Convivencia Escolar y Áreas de apoyo, acompaña a los estudiantes en su crecimiento personal, social y espiritual, favoreciendo la construcción de una identidad sólida y comprometida. Nuestro objetivo es formar personas íntegras, capaces de vivir con sentido, desarrollar sus talentos y aportar positivamente a la sociedad desde su ideal personal.
                 </p>
               </div>
               
@@ -432,7 +420,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
               ) : rectoriaMembers.length > 0 ? (
                 <DirectoryCarousel items={rectoriaMembers} />
               ) : (
-                <p className="text-center text-gray-600 py-4">No hay miembros de rectoría registrados.</p>
+                <p className="text-center text-gray-600 py-4">No hay miembros del equipo directivo registrados.</p>
               )}
             </div>
           </div>

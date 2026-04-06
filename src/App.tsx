@@ -15,7 +15,7 @@ import Tour360Section from './components/Tour360Section';
 import ACLESSection from './components/ACLESSection';
 import DepartamentoOrientacionSection from './components/DepartamentoOrientacionSection';
 import DepartamentoOrientacionManagement from './components/DepartamentoOrientacionManagement';
-import VicerretoriaFormacionSection from './components/VicerretoriaFormacionSection';
+
 import InstitutionalDocuments from './components/InstitutionalDocuments';
 import InstitutionalDocumentsManagement from './components/InstitutionalDocumentsManagement';
 import CEALSection from './components/CEALSection';
@@ -125,9 +125,7 @@ function App() {
     return <DepartamentoOrientacionSection onBack={handleBackToHome} />;
   }
 
-  if (currentPage === 'vicerrectoria-formacion') {
-    return <VicerretoriaFormacionSection onBack={handleBackToHome} />;
-  }
+
 
   if (currentPage === 'tour-virtual') {
     return <Tour360Section onBack={handleBackToHome} />;

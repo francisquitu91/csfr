@@ -137,26 +137,18 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
       {/* Hero Image Section */}
       <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
-          src="https://i.postimg.cc/R06fLcy9/Manto.jpg"
+          src="https://i.postimg.cc/kGd8JkCC/alumnos.jpg"
           alt="Alumnos del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-          <div className="text-center text-white">
-            <img
-              src="https://i.postimg.cc/FN3R296R/1.png"
-              alt="Logo Colegio Sagrada Familia"
-              className="h-28 md:h-36 w-auto mx-auto drop-shadow-2xl"
-            />
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Proyecto Educativo Section */}
         <div id="proyecto-educativo" className={`bg-white rounded-lg shadow-lg p-8 mb-12 transition-all duration-1000 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Nuestro Proyecto Educativo: Una Alianza Formativa</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Perfil del Alumno</h2>
             <p className="text-gray-700 leading-relaxed mb-6">
               Educamos bajo el Modelo Pedagógico Kentenijiano (MPK). Nuestro enfoque se centra en el crecimiento integral de la persona a través de tres pilares fundamentales: <strong>Vida Interior, Comunidad y Mundo</strong>.
             </p>

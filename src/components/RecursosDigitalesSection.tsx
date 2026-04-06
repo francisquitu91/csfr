@@ -185,7 +185,7 @@ const RecursosDigitalesSection: React.FC<RecursosDigitalesProps> = ({ onBack }) 
           <h3 className="text-xl font-bold text-gray-900 mb-3">💡 ¿Necesitas ayuda?</h3>
           <p className="text-gray-700">
             Si tienes problemas para acceder a las plataformas o necesitas asistencia técnica, 
-            por favor contacta a la administración del colegio o envía un correo a soporte técnico.
+            por favor contacta a <a href="mailto:soporte@csfr.cl" className="font-semibold text-purple-700 hover:underline">soporte@csfr.cl</a>.
           </p>
         </div>
       </div>

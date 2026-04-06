@@ -30,6 +30,8 @@ interface InfoSection {
   content: string;
   icon: React.ReactNode;
   color: string;
+  file_url?: string | null;
+  file_name?: string | null;
 }
 
 interface ContactPerson {
@@ -97,7 +99,9 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
         title: section.title,
         content: section.content,
         icon: getIconComponent(section.icon_name),
-        color: section.color
+        color: section.color,
+        file_url: section.file_url,
+        file_name: section.file_name
       }));
       
       setInfoSections(mappedSections);
@@ -195,26 +199,14 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     {
       id: 4,
       step: 'PASO 4',
-      title: 'Evaluación de madurez (Prekinder)',
-      description: 'Evaluación de madurez escolar para prekinder.',
-      icon: (
-        <svg className="w-20 h-20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-      ),
-      color: 'bg-emerald-600'
-    },
-    {
-      id: 5,
-      step: 'PASO 5',
       title: 'Respuesta a la postulación',
       description: 'Te comunicaremos la decisión del proceso de admisión.',
       icon: <CheckCircle className="w-20 h-20" />,
       color: 'bg-cyan-600'
     },
     {
-      id: 6,
-      step: 'PASO 6',
+      id: 5,
+      step: 'PASO 5',
       title: 'Incorporación',
       description: 'Bienvenido a la familia Sagrada Familia.',
       icon: (
@@ -384,7 +376,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
             <div className="w-48 h-1 bg-[#8B5E3C] mx-auto rounded"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {processSteps.map((step) => (
               <div
                 key={step.id}
@@ -423,17 +415,24 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                   onClick={() => setExpandedInfo(expandedInfo === section.id ? null : section.id)}
                   className="w-full p-6 flex items-center justify-between text-left transition-colors hover:bg-gray-50"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className={`bg-gradient-to-br ${section.color} rounded-xl p-3 text-white`}>
-                      {section.icon}
+                    <div className="flex-1 flex items-center justify-between gap-4">
+                      <div className="flex items-center space-x-4 min-w-0">
+                        <div className={`bg-gradient-to-br ${section.color} rounded-xl p-3 text-white`}>
+                          {section.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-xl font-bold text-gray-900">{section.title}</h3>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 flex-shrink-0">
+                        <ChevronDown
+                          className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${
+                            expandedInfo === section.id ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900">{section.title}</h3>
-                  </div>
-                  <ChevronDown
-                    className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${
-                      expandedInfo === section.id ? 'rotate-180' : ''
-                    }`}
-                  />
                 </button>
 
                 <div
@@ -443,6 +442,21 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                 >
                   <div className="px-6 pb-6">
                     <div className="bg-gray-50 rounded-xl p-6">
+                      {section.file_url && (
+                        <div className="mb-6">
+                          <a
+                            href={section.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                          >
+                            DESCARGAR DOCUMENTO
+                          </a>
+                          {section.file_name && (
+                            <p className="text-sm text-gray-500 mt-2">{section.file_name}</p>
+                          )}
+                        </div>
+                      )}
                       {section.content.includes('[TABLA_VACANTES]') ? (
                         <>
                           <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-6">
@@ -505,7 +519,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
               {/* Lado izquierdo - Texto */}
               <div className="flex flex-col justify-center text-white">
                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                  A tu disposición
+                  Contacto
                 </h2>
                 <div className="w-48 h-1 bg-purple-900 mb-8 rounded-full"></div>
               </div>
@@ -520,7 +534,8 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                   />
                 </div>
                 <h3 className="text-3xl font-bold text-white mb-2">{contactPerson.name}</h3>
-                <p className="text-xl text-white/90 mb-6">{contactPerson.role}</p>
+                <p className="text-xl text-white/90 mb-2">{contactPerson.role}</p>
+                <p className="text-lg text-white/90 mb-6">9 3242 2220</p>
                 
                 <div className="space-y-4 text-white w-full max-w-md">
                   <div className="flex items-start space-x-3">

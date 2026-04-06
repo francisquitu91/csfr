@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Trash2, Plus, X, Edit } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Plus, X, Edit, Upload, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AdmisionManagementProps {
@@ -13,6 +13,12 @@ interface InfoSection {
   icon_name: string;
   color: string;
   order_index: number;
+  file_url?: string | null;
+  file_name?: string | null;
+}
+
+interface InfoSectionForm extends InfoSection {
+  file: File | null;
 }
 
 interface Vacante {
@@ -35,7 +41,7 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'sections' | 'vacantes' | 'fecha'>('sections');
-  const [editingSection, setEditingSection] = useState<InfoSection | null>(null);
+  const [editingSection, setEditingSection] = useState<InfoSectionForm | null>(null);
   const [editingVacante, setEditingVacante] = useState<Vacante | null>(null);
 
   useEffect(() => {
@@ -76,10 +82,39 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
     }
   };
 
+  const uploadSectionFile = async (file: File): Promise<{ fileUrl: string; fileName: string }> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `admision-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-  const handleSaveSection = async (section: InfoSection) => {
+    const { error: uploadError } = await supabase.storage
+      .from('institutional-documents')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('institutional-documents')
+      .getPublicUrl(fileName);
+
+    return {
+      fileUrl: data.publicUrl,
+      fileName: file.name
+    };
+  };
+
+
+  const handleSaveSection = async (section: InfoSectionForm) => {
     setLoading(true);
     try {
+      let fileUrl = section.file_url ?? null;
+      let fileName = section.file_name ?? null;
+
+      if (section.file) {
+        const uploadedFile = await uploadSectionFile(section.file);
+        fileUrl = uploadedFile.fileUrl;
+        fileName = uploadedFile.fileName;
+      }
+
       if (section.id) {
         await supabase
           .from('admision_info_sections')
@@ -88,13 +123,23 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
             content: section.content,
             icon_name: section.icon_name,
             color: section.color,
-            order_index: section.order_index
+            order_index: section.order_index,
+            file_url: fileUrl,
+            file_name: fileName
           })
           .eq('id', section.id);
       } else {
         await supabase
           .from('admision_info_sections')
-          .insert([section]);
+          .insert([{ 
+            title: section.title,
+            content: section.content,
+            icon_name: section.icon_name,
+            color: section.color,
+            order_index: section.order_index,
+            file_url: fileUrl,
+            file_name: fileName
+          }]);
       }
       setMessage('Sección guardada exitosamente');
       setEditingSection(null);
@@ -273,7 +318,10 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
                     content: '',
                     icon_name: 'FileText',
                     color: 'from-blue-600 to-blue-800',
-                    order_index: infoSections.length + 1
+                    order_index: infoSections.length + 1,
+                    file_url: null,
+                    file_name: null,
+                    file: null
                   })}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
                 >
@@ -345,6 +393,30 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Documento asociado</label>
+                      <div className="flex items-center space-x-4">
+                        <label className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors">
+                          <Upload className="w-5 h-5" />
+                          <span>Subir archivo</span>
+                          <input
+                            type="file"
+                            onChange={(e) => setEditingSection({
+                              ...editingSection,
+                              file: e.target.files?.[0] || null
+                            })}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx"
+                          />
+                        </label>
+                        <div className="text-sm text-gray-600">
+                          {editingSection.file?.name || editingSection.file_name || 'Sin archivo seleccionado'}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Este archivo quedará disponible como enlace en la sección pública.
+                      </p>
+                    </div>
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleSaveSection(editingSection)}
@@ -376,11 +448,12 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
                           <span>Icono: {section.icon_name}</span>
                           <span>Color: {section.color}</span>
                           <span>Orden: {section.order_index}</span>
+                          {section.file_url && <span>Documento: {section.file_name || 'Adjunto'}</span>}
                         </div>
                       </div>
                       <div className="flex space-x-2 ml-4">
                         <button
-                          onClick={() => setEditingSection(section)}
+                          onClick={() => setEditingSection({ ...section, file: null })}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <Edit className="w-5 h-5" />

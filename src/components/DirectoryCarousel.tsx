@@ -14,11 +14,11 @@ const DirectoryCarousel: React.FC<DirectoryCarouselProps> = ({ items }) => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-4">
       {items.map((item, index) => (
         <div key={index} className="flex flex-col items-center space-y-3 p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105">
-          <div className="w-full aspect-square overflow-hidden rounded-lg border-4 border-blue-100">
+          <div className="w-full aspect-square overflow-hidden rounded-lg border-4 border-blue-100 bg-gray-100 flex items-center justify-center">
             <img
               src={item.photoUrl}
               alt={item.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
           <p className="text-center text-gray-800 font-medium text-sm leading-tight">

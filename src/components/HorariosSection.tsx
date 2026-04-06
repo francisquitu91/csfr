@@ -1,13 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, Download, FileText, Calendar, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Clock, Calendar, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-interface DocumentoHorario {
+interface HorarioModulo {
   id: number;
-  title: string;
-  file_url: string;
-  year: string;
-  categoria: string;
+  modulo_label: string;
+  hora_inicio: string;
+  hora_fin: string;
+  order_index: number;
+}
+
+interface HorarioCurso {
+  id: number;
+  nivel: string;
+  curso: string;
+  order_index: number;
+}
+
+interface HorarioBloque {
+  id: number;
+  curso_id: number;
+  dia_semana: number;
+  modulo_id: number;
+  asignatura: string;
+  hora_inicio?: string | null;
+  hora_fin?: string | null;
 }
 
 interface HorariosSectionProps {
@@ -15,38 +32,85 @@ interface HorariosSectionProps {
 }
 
 const HorariosSection: React.FC<HorariosSectionProps> = ({ onBack }) => {
-  const [documentos, setDocumentos] = useState<DocumentoHorario[]>([]);
+  const [modulos, setModulos] = useState<HorarioModulo[]>([]);
+  const [cursos, setCursos] = useState<HorarioCurso[]>([]);
+  const [bloques, setBloques] = useState<HorarioBloque[]>([]);
+  const [cursoActivoId, setCursoActivoId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Categorías de horarios
-  const categorias = [
-    'Horarios Primer Ciclo',
-    'Horarios Segundo Ciclo',
-    'Horarios Enseñanza Media Menor',
-    'Horarios Educación Media Superior',
-    'Horarios ACLEs'
+  const dias = [
+    { id: 1, label: 'Lunes' },
+    { id: 2, label: 'Martes' },
+    { id: 3, label: 'Miércoles' },
+    { id: 4, label: 'Jueves' },
+    { id: 5, label: 'Viernes' }
   ];
 
   useEffect(() => {
-    fetchDocumentos();
+    fetchHorarios();
   }, []);
 
-  const fetchDocumentos = async () => {
+  const fetchHorarios = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('horarios')
-        .select('*')
-        .order('year', { ascending: false });
+      const [modulosRes, cursosRes, bloquesRes] = await Promise.all([
+        supabase
+          .from('horario_modulos')
+          .select('*')
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('horario_cursos')
+          .select('*')
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('horario_bloques')
+          .select('*')
+      ]);
 
-      if (error) throw error;
-      if (data) setDocumentos(data);
+      if (modulosRes.error) throw modulosRes.error;
+      if (cursosRes.error) throw cursosRes.error;
+      if (bloquesRes.error) throw bloquesRes.error;
+
+      setModulos(modulosRes.data || []);
+      const cursosData = cursosRes.data || [];
+      setCursos(cursosData);
+      if (cursosData.length > 0) {
+        setCursoActivoId((prev) => prev ?? cursosData[0].id);
+      }
+      setBloques(bloquesRes.data || []);
     } catch (error) {
       console.error('Error fetching horarios:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const bloquesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const bloque of bloques) {
+      map.set(`${bloque.curso_id}-${bloque.dia_semana}-${bloque.modulo_id}`, bloque.asignatura || '');
+    }
+    return map;
+  }, [bloques]);
+
+  const getBloque = (cursoId: number, diaSemana: number, moduloId: number) => {
+    return bloquesMap.get(`${cursoId}-${diaSemana}-${moduloId}`) || '';
+  };
+
+  const formatHora = (hora: string) => hora?.slice(0, 5) || hora;
+
+  const getHoraModuloCurso = (cursoId: number, modulo: HorarioModulo, field: 'hora_inicio' | 'hora_fin') => {
+    const bloqueDia1 = bloques.find(
+      (b) => b.curso_id === cursoId && b.dia_semana === 1 && b.modulo_id === modulo.id
+    );
+    const bloqueDia2 = bloques.find(
+      (b) => b.curso_id === cursoId && b.dia_semana === 2 && b.modulo_id === modulo.id
+    );
+    const bloque = bloqueDia1 || bloqueDia2;
+    return (bloque?.[field] as string | null | undefined) || (field === 'hora_inicio' ? modulo.hora_inicio : modulo.hora_fin);
+  };
+
+  const cursoActivo = cursos.find((c) => c.id === cursoActivoId) || null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-emerald-50">
@@ -70,111 +134,81 @@ const HorariosSection: React.FC<HorariosSectionProps> = ({ onBack }) => {
           </h1>
           <div className="w-32 h-1 bg-gradient-to-r from-green-500 to-teal-500 mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Consulta los horarios de clases actualizados por ciclo educativo
+            Consulta y revisa los módulos de clases en formato calendario por nivel
           </p>
         </div>
 
-        {/* Información General */}
-        <div className="mb-12 bg-white rounded-2xl shadow-xl p-8 border-t-4 border-green-500">
-          <div className="flex items-start space-x-4 mb-6">
-            <Calendar className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Información sobre Horarios
-              </h2>
-              <div className="prose prose-lg text-gray-700 space-y-4">
-                <p>
-                  Los horarios escolares están diseñados para optimizar el aprendizaje de nuestros estudiantes, 
-                  distribuyendo equilibradamente las asignaturas a lo largo de la semana. Cada ciclo educativo cuenta 
-                  con un horario específico que incluye las horas de clases, recreos y actividades complementarias.
-                </p>
-                <p>
-                  Es fundamental que los estudiantes y apoderados conozcan y respeten los horarios establecidos, 
-                  ya que la puntualidad es un valor esencial en nuestra comunidad educativa.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Normativa de Horarios */}
-          <div className="mt-8 bg-green-50 rounded-xl p-6 border-l-4 border-green-500">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-              <Clock className="w-6 h-6 text-green-600 mr-2" />
-              Consideraciones Importantes
-            </h3>
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-green-600 font-bold mr-2">•</span>
-                <span>
-                  <strong>Puntualidad:</strong> Los estudiantes deben llegar al establecimiento al menos 10 minutos 
-                  antes del inicio de clases.
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 font-bold mr-2">•</span>
-                <span>
-                  <strong>Cambios de Horario:</strong> Cualquier modificación en el horario será comunicada con 
-                  anticipación a través de la libreta de comunicaciones o plataforma digital.
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 font-bold mr-2">•</span>
-                <span>
-                  <strong>Horarios Diferenciados:</strong> Los niveles de Pre-Escolar tienen horarios especiales 
-                  adaptados a las necesidades de los párvulos.
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Lista de Horarios por Categoría */}
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
-            <p className="mt-4 text-gray-600">Cargando horarios...</p>
+            <p className="mt-4 text-gray-600">Cargando calendario de horarios...</p>
           </div>
-        ) : documentos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documentos.map((doc) => (
-              <div
-                key={doc.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-t-4 border-green-500"
-              >
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                      {doc.year}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <div className="bg-teal-100 text-teal-800 px-3 py-2 rounded-lg text-center font-bold mb-3">
-                      {doc.categoria}
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                      {doc.title}
-                    </h3>
-                  </div>
-                  
-                  <a
-                    href={doc.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-lg hover:from-green-700 hover:to-teal-700 transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md hover:shadow-lg"
-                  >
-                    <Download className="w-5 h-5 group-hover:animate-bounce" />
-                    <span className="font-semibold">Descargar Horario</span>
-                  </a>
-                </div>
+        ) : modulos.length > 0 && cursos.length > 0 && cursoActivoId != null ? (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border-t-4 border-green-500">
+            <div className="mb-6 grid md:grid-cols-2 gap-4 items-end">
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-2">Curso</label>
+                <select
+                  value={cursoActivoId}
+                  onChange={(e) => setCursoActivoId(Number(e.target.value))}
+                  className="w-full rounded-lg border border-green-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  {cursos.map((curso) => (
+                    <option key={curso.id} value={curso.id}>
+                      {curso.curso} - {curso.nivel}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
+              <div className="text-sm text-gray-600 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
+                Mostrando horario de: <span className="font-bold text-green-800">{cursoActivo?.curso || '-'}</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <div className="min-w-[980px] rounded-2xl border border-green-100 overflow-hidden">
+                <div className="grid grid-cols-6 bg-gradient-to-r from-green-600 to-teal-600 text-white">
+                  <div className="p-4 font-bold text-sm uppercase tracking-wide">Módulo</div>
+                  {dias.map((dia) => (
+                    <div key={dia.id} className="p-4 font-bold text-center text-sm uppercase tracking-wide border-l border-white/20">
+                      {dia.label}
+                    </div>
+                  ))}
+                </div>
+
+                {modulos.map((modulo, index) => (
+                  <div key={modulo.id} className={`grid grid-cols-6 ${index % 2 === 0 ? 'bg-white' : 'bg-green-50/50'}`}>
+                    <div className="p-4 border-t border-green-100">
+                      <p className="font-bold text-gray-900 text-sm">{modulo.modulo_label}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatHora(getHoraModuloCurso(cursoActivoId, modulo, 'hora_inicio'))} - {formatHora(getHoraModuloCurso(cursoActivoId, modulo, 'hora_fin'))}
+                      </p>
+                    </div>
+                    {dias.map((dia) => (
+                      <div key={`${modulo.id}-${dia.id}`} className="p-3 border-t border-l border-green-100 min-h-[96px]">
+                        <div className="rounded-lg bg-white/80 border border-green-100 h-full p-2">
+                          <p className="text-sm text-gray-700 leading-snug whitespace-pre-line">
+                            {getBloque(cursoActivoId, dia.id, modulo.id) || '---'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 bg-green-50 rounded-xl p-5 border-l-4 border-green-500">
+              <p className="text-gray-700 text-sm md:text-base">
+                Este calendario es referencial y puede ser ajustado por coordinación académica según actividades institucionales.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-xl shadow-lg">
             <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">
-              No hay horarios disponibles en este momento
+              No hay horarios configurados en este momento
             </p>
           </div>
         )}

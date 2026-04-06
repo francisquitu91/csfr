@@ -22,7 +22,9 @@ const ACLESSection: React.FC<ACLESSectionProps> = ({ onBack }) => {
   ];
 
   const artisticas = [
-    'Taller de arte',
+    'Taller de Arte',
+    'Taller de Coro',
+    'Taller de Teatro',
     'Taller de Electroacústica'
   ];
 
@@ -63,7 +65,7 @@ const ACLESSection: React.FC<ACLESSectionProps> = ({ onBack }) => {
                 Las ACLES son actividades de libre elección que se enmarcan dentro del proceso formativo del colegio y permiten a nuestros alumnos y alumnas ejercitar su libertad y su responsabilidad.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Todos los alumnos que cursan entre 4to básico y II medio tienen la obligación de participar, como mínimo, en una de las actividades que el Colegio ofrece, inscribiéndose a comienzos de cada año de acuerdo a sus intereses y/o aptitudes personales.
+                Todos los alumnos que cursan entre 1° medio y 8° básico tienen la obligación de participar, como mínimo, en una de las actividades que el Colegio ofrece, inscribiéndose a comienzos de cada año de acuerdo a sus intereses y/o aptitudes personales.
               </p>
             </div>
           </div>

@@ -1,168 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Trash2, Plus, X, Upload, FileText, Download, Edit, Clock } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Save, X, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface HorariosManagementProps {
   onBack: () => void;
 }
 
-interface DocumentoHorario {
-  id?: number;
-  title: string;
-  file_url: string;
-  year: string;
-  categoria: string;
+interface HorarioCurso {
+  id: number;
+  nivel: string;
+  curso: string;
+  order_index: number;
 }
 
-const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
-  const [documentos, setDocumentos] = useState<DocumentoHorario[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [editingDoc, setEditingDoc] = useState<DocumentoHorario | null>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
+interface HorarioModulo {
+  id: number;
+  modulo_label: string;
+  hora_inicio: string;
+  hora_fin: string;
+  order_index: number;
+}
 
-  const categorias = [
-    'Horarios Primer Ciclo',
-    'Horarios Segundo Ciclo',
-    'Horarios Enseñanza Media Menor',
-    'Horarios Educación Media Superior',
-    'Horarios ACLEs'
-  ];
+interface HorarioBloque {
+  id?: number;
+  curso_id: number;
+  dia_semana: number;
+  modulo_id: number;
+  asignatura: string;
+  hora_inicio?: string | null;
+  hora_fin?: string | null;
+}
+
+const dias = [
+  { id: 1, label: 'Lunes' },
+  { id: 2, label: 'Martes' },
+  { id: 3, label: 'Miércoles' },
+  { id: 4, label: 'Jueves' },
+  { id: 5, label: 'Viernes' }
+];
+
+const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
+  const [cursos, setCursos] = useState<HorarioCurso[]>([]);
+  const [modulos, setModulos] = useState<HorarioModulo[]>([]);
+  const [bloques, setBloques] = useState<HorarioBloque[]>([]);
+  const [selectedCursoId, setSelectedCursoId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetchDocumentos();
+    fetchData();
   }, []);
 
-  const fetchDocumentos = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('horarios')
-        .select('*')
-        .order('year', { ascending: false });
+      const [cursosRes, modulosRes, bloquesRes] = await Promise.all([
+        supabase.from('horario_cursos').select('*').order('order_index', { ascending: true }),
+        supabase.from('horario_modulos').select('*').order('order_index', { ascending: true }),
+        supabase.from('horario_bloques').select('*')
+      ]);
 
-      if (error) throw error;
-      if (data) setDocumentos(data);
+      if (cursosRes.error) throw cursosRes.error;
+      if (modulosRes.error) throw modulosRes.error;
+      if (bloquesRes.error) throw bloquesRes.error;
+
+      const cursosData = cursosRes.data || [];
+      setCursos(cursosData);
+      setModulos(modulosRes.data || []);
+      setBloques(bloquesRes.data || []);
+
+      if (cursosData.length > 0) {
+        setSelectedCursoId((prev) => prev ?? cursosData[0].id);
+      }
     } catch (error) {
-      console.error('Error fetching documentos:', error);
-      setMessage('Error al cargar documentos');
+      console.error('Error fetching horarios data:', error);
+      setMessage('Error al cargar los horarios');
     } finally {
       setLoading(false);
     }
   };
 
-  const uploadFile = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `horarios/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('horarios-files')
-      .upload(fileName, file);
+  const bloquesMap = useMemo(() => {
+    const map = new Map<string, HorarioBloque>();
+    for (const bloque of bloques) {
+      map.set(`${bloque.curso_id}-${bloque.dia_semana}-${bloque.modulo_id}`, bloque);
+    }
+    return map;
+  }, [bloques]);
 
-    if (uploadError) throw uploadError;
+  const cursoActual = useMemo(
+    () => cursos.find((curso) => curso.id === selectedCursoId) || null,
+    [cursos, selectedCursoId]
+  );
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('horarios-files')
-      .getPublicUrl(fileName);
-
-    return publicUrl;
+  const getAsignatura = (cursoId: number, diaSemana: number, moduloId: number) => {
+    return bloquesMap.get(`${cursoId}-${diaSemana}-${moduloId}`)?.asignatura || '';
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const getHoraModuloCurso = (cursoId: number, modulo: HorarioModulo, field: 'hora_inicio' | 'hora_fin') => {
+    const bloqueDia1 = bloquesMap.get(`${cursoId}-1-${modulo.id}`);
+    const bloqueDia2 = bloquesMap.get(`${cursoId}-2-${modulo.id}`);
+    const bloque = bloqueDia1 || bloqueDia2;
+    return (bloque?.[field] as string | undefined | null) || (field === 'hora_inicio' ? modulo.hora_inicio : modulo.hora_fin);
+  };
 
-    if (!file.type.includes('pdf')) {
-      setMessage('Solo se permiten archivos PDF');
+  const setAsignatura = (cursoId: number, diaSemana: number, moduloId: number, value: string) => {
+    setBloques((prev) => {
+      const index = prev.findIndex(
+        (b) => b.curso_id === cursoId && b.dia_semana === diaSemana && b.modulo_id === moduloId
+      );
+
+      if (index >= 0) {
+        const next = [...prev];
+        next[index] = { ...next[index], asignatura: value };
+        return next;
+      }
+
+      return [...prev, { curso_id: cursoId, dia_semana: diaSemana, modulo_id: moduloId, asignatura: value }];
+    });
+  };
+
+  const updateModuloHora = (cursoId: number, moduloId: number, field: 'hora_inicio' | 'hora_fin', value: string) => {
+    setBloques((prev) => {
+      let next = [...prev];
+
+      for (const dia of dias) {
+        const idx = next.findIndex(
+          (b) => b.curso_id === cursoId && b.dia_semana === dia.id && b.modulo_id === moduloId
+        );
+
+        if (idx >= 0) {
+          next[idx] = { ...next[idx], [field]: value };
+        } else {
+          next.push({
+            curso_id: cursoId,
+            dia_semana: dia.id,
+            modulo_id: moduloId,
+            asignatura: '',
+            [field]: value
+          });
+        }
+      }
+
+      return next;
+    });
+  };
+
+  const saveCursoHorario = async () => {
+    if (!selectedCursoId) {
+      setMessage('Selecciona un curso para guardar');
       return;
     }
 
-    setUploadingFile(true);
+    setSaving(true);
     try {
-      const fileUrl = await uploadFile(file);
-      if (editingDoc) {
-        setEditingDoc({ ...editingDoc, file_url: fileUrl });
-      }
-      setMessage('Archivo subido exitosamente');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      setMessage('Error al subir archivo');
-    } finally {
-      setUploadingFile(false);
-    }
-  };
+      const fullPayload = dias.flatMap((dia) =>
+        modulos.map((modulo) => ({
+          curso_id: selectedCursoId,
+          dia_semana: dia.id,
+          modulo_id: modulo.id,
+          asignatura: getAsignatura(selectedCursoId, dia.id, modulo.id),
+          hora_inicio: getHoraModuloCurso(selectedCursoId, modulo, 'hora_inicio'),
+          hora_fin: getHoraModuloCurso(selectedCursoId, modulo, 'hora_fin')
+        }))
+      );
 
-  const handleSaveDoc = async () => {
-    if (!editingDoc) return;
-
-    if (!editingDoc.title || !editingDoc.year || !editingDoc.categoria || !editingDoc.file_url) {
-      setMessage('Por favor completa todos los campos y sube un archivo');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      if (editingDoc.id) {
-        const { error } = await supabase
-          .from('horarios')
-          .update({
-            title: editingDoc.title,
-            year: editingDoc.year,
-            categoria: editingDoc.categoria,
-            file_url: editingDoc.file_url
-          })
-          .eq('id', editingDoc.id);
-
-        if (error) throw error;
-        setMessage('Documento actualizado exitosamente');
-      } else {
-        const { error } = await supabase
-          .from('horarios')
-          .insert([{
-            title: editingDoc.title,
-            year: editingDoc.year,
-            categoria: editingDoc.categoria,
-            file_url: editingDoc.file_url
-          }]);
-
-        if (error) throw error;
-        setMessage('Documento creado exitosamente');
-      }
-      
-      setEditingDoc(null);
-      fetchDocumentos();
-    } catch (error) {
-      console.error('Error saving documento:', error);
-      setMessage('Error al guardar documento');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteDoc = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este documento?')) return;
-
-    setLoading(true);
-    try {
       const { error } = await supabase
-        .from('horarios')
-        .delete()
-        .eq('id', id);
+        .from('horario_bloques')
+        .upsert(fullPayload, { onConflict: 'curso_id,dia_semana,modulo_id' });
 
       if (error) throw error;
-      setMessage('Documento eliminado');
-      fetchDocumentos();
+
+      setMessage(`Horario guardado para ${cursoActual?.curso || 'el curso seleccionado'}`);
+      await fetchData();
     } catch (error) {
-      console.error('Error deleting documento:', error);
-      setMessage('Error al eliminar documento');
+      console.error('Error saving course timetable:', error);
+      setMessage('Error al guardar el horario del curso');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  const formatHora = (hora: string) => hora?.slice(0, 5) || hora;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={onBack}
           className="flex items-center text-blue-600 hover:text-blue-700 transition-all duration-300 mb-8 group"
@@ -171,12 +195,18 @@ const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
           Volver al panel de administración
         </button>
 
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-2">
-            <Clock className="w-10 h-10 text-green-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Gestión de Horarios</h1>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Horarios</h1>
+            <p className="text-gray-600">Selecciona un curso y edita su horario semanal.</p>
           </div>
-          <p className="text-gray-600">Administra los horarios escolares por ciclo educativo</p>
+          <button
+            onClick={saveCursoHorario}
+            disabled={saving || loading || !selectedCursoId}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            <Save className="w-5 h-5" /> Guardar horario del curso
+          </button>
         </div>
 
         {message && (
@@ -188,190 +218,93 @@ const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Documentos de Horarios</h2>
-            <button
-              onClick={() => setEditingDoc({
-                title: '',
-                file_url: '',
-                year: new Date().getFullYear().toString(),
-                categoria: 'Horarios Primer Ciclo'
-              })}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Nuevo Horario</span>
-            </button>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+            <p className="mt-4 text-gray-600">Cargando cursos y horarios...</p>
           </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow p-6">
+            <div className="grid md:grid-cols-2 gap-4 mb-6 items-end">
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-2">Curso</label>
+                <select
+                  value={selectedCursoId ?? ''}
+                  onChange={(e) => setSelectedCursoId(Number(e.target.value))}
+                  className="w-full rounded-lg border border-green-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  {cursos.map((curso) => (
+                    <option key={curso.id} value={curso.id}>
+                      {curso.curso} - {curso.nivel}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Formulario de Edición */}
-          {editingDoc && (
-            <div className="mb-6 p-6 bg-green-50 rounded-lg border-2 border-green-500">
-              <h3 className="text-lg font-semibold mb-4">
-                {editingDoc.id ? 'Editar Horario' : 'Nuevo Horario'}
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Título del Documento
-                  </label>
-                  <input
-                    type="text"
-                    value={editingDoc.title}
-                    onChange={(e) => setEditingDoc({ ...editingDoc, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    placeholder="Ej: Horario 1° Básico - Primer Semestre 2025"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Año
-                    </label>
-                    <input
-                      type="text"
-                      value={editingDoc.year}
-                      onChange={(e) => setEditingDoc({ ...editingDoc, year: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                      placeholder="2025"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Categoría de Horario
-                    </label>
-                    <select
-                      value={editingDoc.categoria}
-                      onChange={(e) => setEditingDoc({ ...editingDoc, categoria: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    >
-                      {categorias.map((categoria) => (
-                        <option key={categoria} value={categoria}>
-                          {categoria}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Archivo PDF
-                  </label>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex-1 cursor-pointer">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-green-500 transition-colors">
-                        <div className="flex items-center justify-center space-x-2 text-gray-600">
-                          <Upload className="w-5 h-5" />
-                          <span>{uploadingFile ? 'Subiendo...' : 'Haz clic para subir PDF'}</span>
-                        </div>
-                      </div>
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        disabled={uploadingFile}
-                      />
-                    </label>
-                  </div>
-                  {editingDoc.file_url && (
-                    <div className="mt-2 flex items-center space-x-2 text-sm text-green-600">
-                      <FileText className="w-4 h-4" />
-                      <span>Archivo cargado correctamente</span>
-                      <a
-                        href={editingDoc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 underline"
-                      >
-                        Ver archivo
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handleSaveDoc}
-                    disabled={loading || uploadingFile}
-                    className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
-                  >
-                    <Save className="w-5 h-5" />
-                    <span>{loading ? 'Guardando...' : 'Guardar Horario'}</span>
-                  </button>
-                  <button
-                    onClick={() => setEditingDoc(null)}
-                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
+              <div className="text-sm text-gray-600 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
+                Editando: <span className="font-bold text-green-800">{cursoActual?.curso || '-'}</span>
               </div>
             </div>
-          )}
 
-          {/* Lista de Documentos */}
-          <div className="space-y-4">
-            {documentos.length > 0 ? (
-              documentos.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Clock className="w-5 h-5 text-green-600" />
-                        <h3 className="font-semibold text-lg text-gray-900">{doc.title}</h3>
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
-                          {doc.categoria}
-                        </span>
-                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
-                          {doc.year}
-                        </span>
-                      </div>
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center space-x-1"
-                      >
-                        <Download className="w-4 h-4" />
-                        <span>Ver/Descargar PDF</span>
-                      </a>
-                    </div>
-                    <div className="flex space-x-2 ml-4">
-                      <button
-                        onClick={() => setEditingDoc(doc)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => doc.id && handleDeleteDoc(doc.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
+            <div className="overflow-x-auto">
+              <div className="min-w-[980px] rounded-2xl border border-green-100 overflow-hidden">
+                <div className="grid grid-cols-6 bg-gradient-to-r from-green-600 to-teal-600 text-white">
+                  <div className="p-4 font-bold text-sm uppercase tracking-wide flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> Módulo
                   </div>
+                  {dias.map((dia) => (
+                    <div key={dia.id} className="p-4 font-bold text-center text-sm uppercase tracking-wide border-l border-white/20">
+                      {dia.label}
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <Clock className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>No hay horarios registrados</p>
-                <p className="text-sm mt-2">Haz clic en "Nuevo Horario" para agregar uno</p>
+
+                {modulos.map((modulo, idx) => (
+                  <div key={modulo.id} className={`grid grid-cols-6 ${idx % 2 === 0 ? 'bg-white' : 'bg-green-50/50'}`}>
+                    <div className="p-4 border-t border-green-100">
+                      <p className="font-bold text-gray-900 text-sm">{modulo.modulo_label}</p>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-gray-500 mb-1 uppercase tracking-wide">Inicio</label>
+                          <input
+                            type="time"
+                            value={selectedCursoId ? formatHora(getHoraModuloCurso(selectedCursoId, modulo, 'hora_inicio')) : formatHora(modulo.hora_inicio)}
+                            onChange={(e) => selectedCursoId && updateModuloHora(selectedCursoId, modulo.id, 'hora_inicio', e.target.value)}
+                            className="w-full px-2 py-1 text-xs border border-green-200 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-gray-500 mb-1 uppercase tracking-wide">Fin</label>
+                          <input
+                            type="time"
+                            value={selectedCursoId ? formatHora(getHoraModuloCurso(selectedCursoId, modulo, 'hora_fin')) : formatHora(modulo.hora_fin)}
+                            onChange={(e) => selectedCursoId && updateModuloHora(selectedCursoId, modulo.id, 'hora_fin', e.target.value)}
+                            className="w-full px-2 py-1 text-xs border border-green-200 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {dias.map((dia) => (
+                      <div key={`${modulo.id}-${dia.id}`} className="p-2 border-t border-l border-green-100 min-h-[96px]">
+                        {selectedCursoId ? (
+                          <textarea
+                            value={getAsignatura(selectedCursoId, dia.id, modulo.id)}
+                            onChange={(e) => setAsignatura(selectedCursoId, dia.id, modulo.id, e.target.value)}
+                            className="w-full h-full min-h-[80px] text-sm p-2 rounded-lg border border-green-100 focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                            placeholder="Asignatura / actividad"
+                          />
+                        ) : (
+                          <div className="h-full flex items-center justify-center text-xs text-gray-400">Selecciona curso</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
