@@ -53,7 +53,7 @@ import PlanLectorSection from './components/PlanLectorSection';
 import PlanLectorManagement from './components/PlanLectorManagement';
 
 const backgroundImages = [
-  'https://i.postimg.cc/63qmNSkN/Vinculos.jpg',
+  'https://i.postimg.cc/kgTkxtpM/pastoral.jpg',
   'https://i.postimg.cc/VNDVp1Hn/Santuario.jpg',
   'https://i.postimg.cc/jSYmJM7R/Infraestructura.jpg',
   'https://i.postimg.cc/kMZk7JMV/Deporte.jpg',

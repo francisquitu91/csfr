@@ -9,6 +9,20 @@ interface CEALManagementProps {
 const CEALManagement: React.FC<CEALManagementProps> = ({ onBack }) => {
   const [members, setMembers] = useState<any[]>([]);
   const [photos, setPhotos] = useState<any[]>([]);
+  const [cealContentId, setCealContentId] = useState<string | null>(null);
+  const [cealContent, setCealContent] = useState({
+    title: 'Centro de Alumnos 2025',
+    paragraph_1:
+      'Este año, como Centro de Alumnos, queremos ser una voz cercana y presente. Nuestra meta es simple pero importante: aportar con pequeños gestos y grandes ideas para que este 2025 sea un año especial para todos.',
+    paragraph_2:
+      'Nos propusimos fortalecer la convivencia, hacer comunidad y darle vida al sello SF que nos une como colegio. Pero también queremos reafirmar el rol del CEAL como un espacio representativo, activo y comprometido, que contribuya de forma concreta a la vida escolar y al crecimiento de cada curso.',
+    paragraph_3:
+      'Creemos que cada uno de nosotros tiene algo valioso que aportar, y que todos podemos dejar una huella en el camino.',
+    quote_text: 'Avanzando juntos, dejando huellas',
+    quote_description:
+      'Queremos seguir creando espacios que nos acerquen, como el Torneo de Media, las Alianzas o la Semana de la Convivencia, donde cada encuentro sea una oportunidad para disfrutar y construir recuerdos.',
+    signature_text: 'Con cariño,\nCentro de Alumnos 2025'
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,16 +36,60 @@ const CEALManagement: React.FC<CEALManagementProps> = ({ onBack }) => {
 
   const fetchData = async () => {
     try {
-      const [membersRes, photosRes] = await Promise.all([
+      const [membersRes, photosRes, contentRes] = await Promise.all([
         supabase.from('ceal_members').select('*').order('order_index'),
-        supabase.from('ceal_photos').select('*').order('order_index')
+        supabase.from('ceal_photos').select('*').order('order_index'),
+        supabase.from('ceal_content').select('*').order('created_at', { ascending: true }).limit(1).maybeSingle()
       ]);
       setMembers(membersRes.data || []);
       setPhotos(photosRes.data || []);
+      if (contentRes.data) {
+        setCealContentId(contentRes.data.id);
+        setCealContent({
+          title: contentRes.data.title || '',
+          paragraph_1: contentRes.data.paragraph_1 || '',
+          paragraph_2: contentRes.data.paragraph_2 || '',
+          paragraph_3: contentRes.data.paragraph_3 || '',
+          quote_text: contentRes.data.quote_text || '',
+          quote_description: contentRes.data.quote_description || '',
+          signature_text: contentRes.data.signature_text || ''
+        });
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveContent = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        title: cealContent.title,
+        paragraph_1: cealContent.paragraph_1,
+        paragraph_2: cealContent.paragraph_2,
+        paragraph_3: cealContent.paragraph_3,
+        quote_text: cealContent.quote_text,
+        quote_description: cealContent.quote_description,
+        signature_text: cealContent.signature_text
+      };
+
+      if (cealContentId) {
+        const { error } = await supabase.from('ceal_content').update(payload).eq('id', cealContentId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from('ceal_content').insert([payload]).select().single();
+        if (error) throw error;
+        setCealContentId(data.id);
+      }
+
+      setSuccess('Contenido CEAL actualizado');
+      fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -154,6 +212,68 @@ const CEALManagement: React.FC<CEALManagementProps> = ({ onBack }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* CEAL Content */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-4">Texto de Centro de Alumnos</h2>
+          <div className="space-y-4">
+            <input
+              value={cealContent.title}
+              onChange={(e) => setCealContent({ ...cealContent, title: e.target.value })}
+              placeholder="Título"
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              value={cealContent.paragraph_1}
+              onChange={(e) => setCealContent({ ...cealContent, paragraph_1: e.target.value })}
+              placeholder="Párrafo 1"
+              rows={4}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              value={cealContent.paragraph_2}
+              onChange={(e) => setCealContent({ ...cealContent, paragraph_2: e.target.value })}
+              placeholder="Párrafo 2"
+              rows={4}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              value={cealContent.paragraph_3}
+              onChange={(e) => setCealContent({ ...cealContent, paragraph_3: e.target.value })}
+              placeholder="Párrafo 3"
+              rows={3}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <input
+              value={cealContent.quote_text}
+              onChange={(e) => setCealContent({ ...cealContent, quote_text: e.target.value })}
+              placeholder="Frase destacada"
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              value={cealContent.quote_description}
+              onChange={(e) => setCealContent({ ...cealContent, quote_description: e.target.value })}
+              placeholder="Texto bajo la frase destacada"
+              rows={4}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              value={cealContent.signature_text}
+              onChange={(e) => setCealContent({ ...cealContent, signature_text: e.target.value })}
+              placeholder="Firma (usa salto de línea para separar)"
+              rows={3}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <button
+              onClick={handleSaveContent}
+              disabled={saving}
+              className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              <span>Guardar contenido CEAL</span>
+            </button>
           </div>
         </div>
       </div>

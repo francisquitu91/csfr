@@ -67,8 +67,11 @@ const UniformesEscolaresManagement: React.FC<UniformesEscolaresManagementProps> 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.includes('pdf')) {
-      setMessage('Solo se permiten archivos PDF');
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'];
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+
+    if (!allowedExtensions.includes(fileExt)) {
+      setMessage('Solo se permiten archivos PDF, Word o imágenes (JPG, PNG, WEBP)');
       return;
     }
 
@@ -251,19 +254,19 @@ const UniformesEscolaresManagement: React.FC<UniformesEscolaresManagementProps> 
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Archivo PDF
+                    Archivo (PDF, Word o imagen)
                   </label>
                   <div className="flex items-center space-x-4">
                     <label className="flex-1 cursor-pointer">
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors">
                         <div className="flex items-center justify-center space-x-2 text-gray-600">
                           <Upload className="w-5 h-5" />
-                          <span>{uploadingFile ? 'Subiendo...' : 'Haz clic para subir PDF'}</span>
+                          <span>{uploadingFile ? 'Subiendo...' : 'Haz clic para subir archivo'}</span>
                         </div>
                       </div>
                       <input
                         type="file"
-                        accept=".pdf"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,image/*"
                         onChange={handleFileUpload}
                         className="hidden"
                         disabled={uploadingFile}
@@ -333,7 +336,7 @@ const UniformesEscolaresManagement: React.FC<UniformesEscolaresManagementProps> 
                         className="text-sm text-blue-600 hover:text-blue-700 flex items-center space-x-1"
                       >
                         <Download className="w-4 h-4" />
-                        <span>Ver/Descargar PDF</span>
+                        <span>Ver/Descargar archivo</span>
                       </a>
                     </div>
                     <div className="flex space-x-2 ml-4">

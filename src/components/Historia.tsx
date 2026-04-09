@@ -10,7 +10,7 @@ interface HistoriaProps {
 }
 
 // Componente para las tarjetas de Sellos Educativos
-const SelloCard: React.FC<{ title: string; description: string; image?: string }> = ({ title, description, image }) => {
+const SelloCard: React.FC<{ title: string; description: string }> = ({ title, description }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -21,14 +21,7 @@ const SelloCard: React.FC<{ title: string; description: string; image?: string }
       <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}>
         {/* Front */}
         <div className="flip-card-front rounded-lg shadow-xl flex items-center justify-center p-6 overflow-hidden relative">
-          {image ? (
-            <>
-              <img src={image} alt={title} className="w-full h-full object-cover absolute inset-0" />
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700"></div>
-          )}
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700"></div>
           <h4 className="text-2xl font-bold text-white text-center relative z-10 drop-shadow-lg">{title}</h4>
         </div>
         {/* Back */}
@@ -176,8 +169,20 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
     },
     {
       year: '2001',
-      title: 'Colegio Sagrada Familia',
-      description: 'El Colegio recibe el nombre de Colegio Sagrada Familia, reflejando la centralidad de la comunidad educativa en el proceso de formación, donde el niño se desarrolla en un verdadero ambiente de hogar, creando vínculos reales de amor y responsabilidad consigo mismo, con Dios, con las personas y las cosas. El nombre destaca la relevancia del padre y de la madre como primeros educadores, quienes, a imagen de la Sagrada Familia, son los principales responsables de la educación de sus hijos, haciéndolo con alegría. En ese mismo año, egresa la primera generación conformada por 6 alumnas del Colegio.',
+      title: 'Egreso primera generación de mujeres',
+      description: 'En este hito, el colegio celebra un momento fundacional de su trayectoria académica: egresa la primera generación de mujeres, reflejando el crecimiento sostenido de la propuesta formativa y la consolidación de su identidad educativa.',
+      icon: <Users className="w-6 h-6" />
+    },
+    {
+      year: '2006',
+      title: 'Egreso primera generación de hombres',
+      description: 'Cinco años más tarde, egresa la primera generación de hombres. Este avance marca una nueva etapa en la historia institucional y fortalece la comunidad escolar desde una formación cada vez más amplia y proyectada al futuro.',
+      icon: <Users className="w-6 h-6" />
+    },
+    {
+      year: '2026',
+      title: 'Transición a colegio mixto',
+      description: 'Durante 2026, el colegio inicia su transición a modalidad mixta como parte de un proceso de actualización institucional, manteniendo su sello formativo y promoviendo una convivencia enriquecida por la diversidad, el respeto y la colaboración entre estudiantes.',
       icon: <Users className="w-6 h-6" />
     }
   ];
@@ -336,17 +341,14 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
                 <SelloCard
                   title="Ideal Personal"
                   description="Bajo el carisma de Schoenstatt, promovemos que cada estudiante descubra y desarrolle su originalidad, plasmada en su Ideal Personal como propósito y vocación de vida."
-                  image="https://i.postimg.cc/SxdLQ6Yz/ideapersonl.png"
                 />
                 <SelloCard
                   title="Ser Orgánico"
                   description="Siguiendo la pedagogía de Schoenstatt, creemos que un desarrollo orgánico que integre las dimensiones intelectual, emocional y espiritual, es clave para que los estudiantes alcancen su potencial y se conviertan en agentes de cambio social."
-                  image="https://i.postimg.cc/MGwLNm2V/rezar.png"
                 />
                 <SelloCard
                   title="Estilo Mariano"
                   description="Reconocemos en María, Madre de Jesús y Corredentora, nuestra Madre, quien nos ofrece un camino para encontrarnos con su Hijo Jesús. Inspirados en la espiritualidad de Schoenstatt y en los hitos que dieron origen a nuestro colegio, surge un vínculo personal con María quien regala permanentemente a nuestra comunidad tres gracias desde su Santuario: el acogimiento, la transformación y el envío apostólico."
-                  image="https://i.postimg.cc/sX74rtY1/iglesia.png"
                 />
               </div>
             </div>

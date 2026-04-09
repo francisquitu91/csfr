@@ -21,9 +21,35 @@ interface Photo {
   order_index: number;
 }
 
+interface CEALContent {
+  id: string;
+  title: string;
+  paragraph_1: string;
+  paragraph_2: string;
+  paragraph_3: string;
+  quote_text: string;
+  quote_description: string;
+  signature_text: string;
+}
+
+const defaultCealContent = {
+  title: 'Centro de Alumnos 2025',
+  paragraph_1:
+    'Este año, como Centro de Alumnos, queremos ser una voz cercana y presente. Nuestra meta es simple pero importante: aportar con pequeños gestos y grandes ideas para que este 2025 sea un año especial para todos.',
+  paragraph_2:
+    'Nos propusimos fortalecer la convivencia, hacer comunidad y darle vida al sello SF que nos une como colegio. Pero también queremos reafirmar el rol del CEAL como un espacio representativo, activo y comprometido, que contribuya de forma concreta a la vida escolar y al crecimiento de cada curso.',
+  paragraph_3:
+    'Creemos que cada uno de nosotros tiene algo valioso que aportar, y que todos podemos dejar una huella en el camino.',
+  quote_text: 'Avanzando juntos, dejando huellas',
+  quote_description:
+    'Queremos seguir creando espacios que nos acerquen, como el Torneo de Media, las Alianzas o la Semana de la Convivencia, donde cada encuentro sea una oportunidad para disfrutar y construir recuerdos.',
+  signature_text: 'Con cariño,\nCentro de Alumnos 2025'
+};
+
 const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
   const [members, setMembers] = useState<CEALMember[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [cealContent, setCealContent] = useState(defaultCealContent);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
@@ -46,9 +72,10 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
     try {
       setLoading(true);
       
-      const [membersData, photosData] = await Promise.all([
+      const [membersData, photosData, cealContentData] = await Promise.all([
         supabase.from('ceal_members').select('*').order('order_index'),
-        supabase.from('ceal_photos').select('*').order('order_index')
+        supabase.from('ceal_photos').select('*').order('order_index'),
+        supabase.from('ceal_content').select('*').order('created_at', { ascending: true }).limit(1).maybeSingle()
       ]);
 
       if (membersData.error) throw membersData.error;
@@ -56,6 +83,22 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
 
       setMembers(membersData.data || []);
       setPhotos(photosData.data || []);
+
+      // Keep CEAL members visible even if editable content table is not yet migrated.
+      if (cealContentData.error) {
+        console.warn('CEAL content not available yet:', cealContentData.error.message);
+      } else if (cealContentData.data) {
+        const content = cealContentData.data as CEALContent;
+        setCealContent({
+          title: content.title || defaultCealContent.title,
+          paragraph_1: content.paragraph_1 || defaultCealContent.paragraph_1,
+          paragraph_2: content.paragraph_2 || defaultCealContent.paragraph_2,
+          paragraph_3: content.paragraph_3 || defaultCealContent.paragraph_3,
+          quote_text: content.quote_text || defaultCealContent.quote_text,
+          quote_description: content.quote_description || defaultCealContent.quote_description,
+          signature_text: content.signature_text || defaultCealContent.signature_text
+        });
+      }
     } catch (error) {
       console.error('Error fetching CEAL data:', error);
     } finally {
@@ -139,7 +182,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
         <img
           src="https://i.postimg.cc/kGd8JkCC/alumnos.jpg"
           alt="Alumnos del Colegio Sagrada Familia"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-top"
         />
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
@@ -257,35 +300,23 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
 
         {/* CEAL 2025 Content */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold text-blue-900 mb-4 text-center">Centro de Alumnos 2025</h3>
+          <h3 className="text-2xl font-bold text-blue-900 mb-4 text-center">{cealContent.title}</h3>
           
           <div className="space-y-4 text-gray-700 leading-relaxed">
-            <p>
-              Este año, como Centro de Alumnos, queremos ser una voz cercana y presente. Nuestra meta es simple pero importante: 
-              aportar con pequeños gestos y grandes ideas para que este 2025 sea un año especial para todos.
-            </p>
+            <p>{cealContent.paragraph_1}</p>
             
-            <p>
-              Nos propusimos fortalecer la convivencia, hacer comunidad y darle vida al sello SF que nos une como colegio. 
-              Pero también queremos reafirmar el rol del CEAL como un espacio representativo, activo y comprometido, 
-              que contribuya de forma concreta a la vida escolar y al crecimiento de cada curso.
-            </p>
+            <p>{cealContent.paragraph_2}</p>
             
-            <p>
-              Creemos que cada uno de nosotros tiene algo valioso que aportar, y que todos podemos dejar una huella en el camino.
-            </p>
+            <p>{cealContent.paragraph_3}</p>
             
             <div className="bg-blue-50 border-l-4 border-blue-600 p-6 my-6 rounded">
               <p className="text-xl font-semibold text-blue-900 mb-2">
-                "Avanzando juntos, dejando huellas"
+                "{cealContent.quote_text}"
               </p>
-              <p className="text-gray-700">
-                Queremos seguir creando espacios que nos acerquen, como el Torneo de Media, las Alianzas o la Semana de la Convivencia, 
-                donde cada encuentro sea una oportunidad para disfrutar y construir recuerdos.
-              </p>
+              <p className="text-gray-700">{cealContent.quote_description}</p>
             </div>
             
-            <p className="text-right italic">Con cariño,<br />Centro de Alumnos 2025</p>
+            <p className="text-right italic whitespace-pre-line">{cealContent.signature_text}</p>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Mail, MapPin, FileText, Users, CheckCircle, ChevronDown, Calendar, Banknote } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, Phone, FileText, Users, CheckCircle, ChevronDown, Calendar, Banknote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AdmisionSectionProps {
@@ -138,6 +138,48 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     }
   };
 
+  const renderContentWithLinks = (content: string) => {
+    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
+    return content.split('\n').map((line, lineIndex) => {
+      const parts: React.ReactNode[] = [];
+      let lastIndex = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = markdownLinkRegex.exec(line)) !== null) {
+        if (match.index > lastIndex) {
+          parts.push(line.slice(lastIndex, match.index));
+        }
+
+        parts.push(
+          <a
+            key={`link-${lineIndex}-${match.index}`}
+            href={match[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-700 hover:text-blue-800 underline font-medium"
+          >
+            {match[1]}
+          </a>
+        );
+
+        lastIndex = match.index + match[0].length;
+      }
+
+      if (lastIndex < line.length) {
+        parts.push(line.slice(lastIndex));
+      }
+
+      markdownLinkRegex.lastIndex = 0;
+
+      return (
+        <p key={`line-${lineIndex}`} className="text-gray-700 leading-relaxed">
+          {parts.length > 0 ? parts : line}
+        </p>
+      );
+    });
+  };
+
   // Info Cards con animación 3D flip
   const infoCards: InfoCard[] = [
     {
@@ -228,7 +270,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     name: 'Jennifer Martínez',
     role: 'Encargada de Admisión',
     email: 'admision@sagradafamilia.cl',
-    phone: '(+569) 9884 9756',
+    phone: '9 3242 2220',
     address: 'Colegio Sagrada Familia\nParcela 4, Los Pinos, Reñaca\nCasilla 5104 – Correo Reñaca',
     photo: 'https://i.postimg.cc/B6RMxtwm/1516855554215.jpg'
   };
@@ -459,9 +501,9 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                       )}
                       {section.content.includes('[TABLA_VACANTES]') ? (
                         <>
-                          <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-6">
-                            {section.content.replace('[TABLA_VACANTES]', '')}
-                          </p>
+                          <div className="space-y-2 mb-6">
+                            {renderContentWithLinks(section.content.replace('[TABLA_VACANTES]', ''))}
+                          </div>
                           <div className="bg-white rounded-lg p-4 shadow-md">
                             <p className="text-sm text-gray-600 mb-4 font-semibold">{fechaActualizacion}</p>
                             <div className="overflow-x-auto">
@@ -500,9 +542,9 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                           </div>
                         </>
                       ) : (
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                          {section.content}
-                        </p>
+                        <div className="space-y-2">
+                          {renderContentWithLinks(section.content)}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -535,7 +577,13 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                 </div>
                 <h3 className="text-3xl font-bold text-white mb-2">{contactPerson.name}</h3>
                 <p className="text-xl text-white/90 mb-2">{contactPerson.role}</p>
-                <p className="text-lg text-white/90 mb-6">9 3242 2220</p>
+                <a
+                  href="tel:+56932422220"
+                  className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-5 py-2 rounded-full border border-white/40 text-2xl font-semibold text-white mb-6 hover:bg-white/30 transition-colors"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>{contactPerson.phone}</span>
+                </a>
                 
                 <div className="space-y-4 text-white w-full max-w-md">
                   <div className="flex items-start space-x-3">

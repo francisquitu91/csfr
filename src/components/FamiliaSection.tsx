@@ -74,15 +74,7 @@ const FamiliaSection: React.FC<FamiliaSectionProps> = ({ onBack }) => {
           alt="Familias del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-          <div className="text-center text-white">
-            <img
-              src="https://i.postimg.cc/FN3R296R/1.png"
-              alt="Logo Colegio Sagrada Familia"
-              className="h-28 md:h-36 w-auto mx-auto drop-shadow-2xl"
-            />
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

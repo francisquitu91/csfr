@@ -41,19 +41,23 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
+  const displayPhotos = photos.length > 0
+    ? photos
+    : [{ id: 'fallback', photo_url: 'https://i.postimg.cc/kgTkxtpM/pastoral.jpg', photo_name: 'pastoral.jpg', order_index: 0 }];
+
   useEffect(() => {
     setIsVisible(true);
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (photos.length > 0) {
+    if (displayPhotos.length > 1) {
       const interval = setInterval(() => {
-        setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % photos.length);
+        setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % displayPhotos.length);
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [photos]);
+  }, [displayPhotos.length]);
 
   const fetchData = async () => {
     try {
@@ -83,11 +87,11 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
   };
 
   const nextPhoto = () => {
-    setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % photos.length);
+    setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % displayPhotos.length);
   };
 
   const prevPhoto = () => {
-    setCurrentPhotoIndex((prevIndex) => (prevIndex - 1 + photos.length) % photos.length);
+    setCurrentPhotoIndex((prevIndex) => (prevIndex - 1 + displayPhotos.length) % displayPhotos.length);
   };
 
   return (
@@ -156,10 +160,10 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
         </div>
 
         {/* Photo Carousel */}
-        {photos.length > 0 && (
+        {displayPhotos.length > 0 && (
           <div className={`relative mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="relative rounded-xl overflow-hidden shadow-2xl bg-gray-100">
-              {photos.map((photo, index) => (
+              {displayPhotos.map((photo, index) => (
                 <div
                   key={photo.id}
                   className={`transition-opacity duration-1000 ${
@@ -175,7 +179,7 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
               ))}
               
               {/* Navigation Arrows */}
-              {photos.length > 1 && (
+              {displayPhotos.length > 1 && (
                 <>
                   <button
                     onClick={prevPhoto}
@@ -193,12 +197,12 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
               )}
 
               {/* Dots Indicator */}
-              {photos.length > 1 && (
+              {displayPhotos.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                  {photos.map((_, index) => (
+                  {displayPhotos.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => { setCurrentPhotoIndex(index); resetZoom(); }}
+                      onClick={() => setCurrentPhotoIndex(index)}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         index === currentPhotoIndex ? 'bg-white w-8' : 'bg-white/50'
                       }`}

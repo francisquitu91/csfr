@@ -94,7 +94,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
             
             <button
               onClick={() => scrollToSection('formacion-convivencia')}
-              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-red-600 flex-shrink-0"
+              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-purple-600 flex-shrink-0"
             >
               <Users className="w-5 h-5" />
               <span className="font-semibold">Formación y convivencia</span>
@@ -102,7 +102,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
 
             <button
               onClick={() => scrollToSection('coordinadores')}
-              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-red-600 flex-shrink-0"
+              className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-purple-600 flex-shrink-0"
             >
               <Target className="w-5 h-5" />
               <span className="font-semibold">Coordinadores de Ciclo</span>
@@ -190,10 +190,10 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
 
         {/* Formación y convivencia */}
         <div id="formacion-convivencia" className={`bg-white rounded-lg shadow-lg overflow-hidden mb-12 transition-all duration-1000 delay-300 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <Heart className="w-8 h-8 text-red-600" />
+                <Heart className="w-8 h-8 text-purple-600" />
               </div>
               <h2 className="text-3xl font-bold text-white">Formación y convivencia</h2>
             </div>
@@ -211,7 +211,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
             </p>
 
             <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <Users className="w-7 h-7 text-red-600 mr-3" />
+              <Users className="w-7 h-7 text-purple-600 mr-3" />
               Equipo
             </h3>
             {loading ? (
@@ -219,7 +219,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
             ) : formacionConvivenciaTeam.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {formacionConvivenciaTeam.map((member) => (
-                  <div key={member.id} className="bg-gradient-to-r from-red-50 to-white p-5 rounded-lg border border-red-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={member.id} className="bg-gradient-to-r from-purple-50 to-white p-5 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-shadow">
                     <p className="font-semibold text-gray-900 text-lg">{member.name}</p>
                     <p className="text-gray-600 text-sm mt-1">{member.position}</p>
                   </div>
@@ -233,10 +233,10 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
 
         {/* Coordinadores de Ciclo */}
         <div id="coordinadores" className={`bg-white rounded-lg shadow-lg overflow-hidden mb-12 transition-all duration-1000 delay-400 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <Target className="w-8 h-8 text-red-600" />
+                <Target className="w-8 h-8 text-purple-600" />
               </div>
               <h2 className="text-3xl font-bold text-white">Coordinadores de Ciclo</h2>
             </div>
@@ -252,7 +252,7 @@ const ProyectoEducativo: React.FC<ProyectoEducativoProps> = ({ onBack }) => {
             ) : (
               <div className="space-y-4">
                 {cycleCoordinators.map((coordinator) => (
-                  <div key={coordinator.id} className="bg-gradient-to-r from-red-50 to-white p-5 rounded-lg border-l-4 border-red-600 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={coordinator.id} className="bg-gradient-to-r from-purple-50 to-white p-5 rounded-lg border-l-4 border-purple-600 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
                         <p className="font-bold text-gray-900 text-lg">{coordinator.cycle_name}</p>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, Download, Calendar, Shirt } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Calendar, Shirt, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface UniformesEscolaresProps {
@@ -48,6 +48,8 @@ const UniformesEscolaresSection: React.FC<UniformesEscolaresProps> = ({ onBack }
   const documentosFiltrados = selectedTipo === 'Todos' 
     ? documentos 
     : documentos.filter(doc => doc.tipo === selectedTipo);
+
+  const isImageFile = (url: string) => /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
@@ -159,7 +161,7 @@ const UniformesEscolaresSection: React.FC<UniformesEscolaresProps> = ({ onBack }
                   <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 text-white">
                     <div className="flex items-start justify-between mb-4">
                       <div className="bg-white/20 p-3 rounded-lg">
-                        <FileText className="w-8 h-8" />
+                        {isImageFile(doc.file_url) ? <ImageIcon className="w-8 h-8" /> : <FileText className="w-8 h-8" />}
                       </div>
                       <div className="flex flex-col items-end space-y-2">
                         <span className="bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
@@ -188,7 +190,7 @@ const UniformesEscolaresSection: React.FC<UniformesEscolaresProps> = ({ onBack }
                       className="w-full inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 group-hover:shadow-lg"
                     >
                       <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
-                      <span className="font-semibold">Descargar Info</span>
+                      <span className="font-semibold">{isImageFile(doc.file_url) ? 'Ver imagen' : 'Descargar archivo'}</span>
                     </a>
                   </div>
                 </div>

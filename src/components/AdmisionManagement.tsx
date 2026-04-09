@@ -334,6 +334,7 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
                 <p><strong>Iconos disponibles:</strong> FileText, Users, CheckCircle, Calendar, DollarSign, Award, BookOpen</p>
                 <p><strong>Colores disponibles:</strong> from-blue-600 to-blue-800, from-green-600 to-green-800, from-purple-600 to-purple-800, from-red-600 to-red-800, from-orange-600 to-orange-800, from-teal-600 to-teal-800, from-indigo-600 to-indigo-800</p>
                 <p><strong>Nota:</strong> Para mostrar la tabla de vacantes en una sección, incluye [TABLA_VACANTES] en el contenido</p>
+                <p><strong>Enlaces en texto:</strong> usa formato [Texto del enlace](https://tu-url.com) y se mostrará clickeable en azul</p>
               </div>
 
               {editingSection && (
