@@ -5,15 +5,16 @@ export default function PlanLectorSection({ onBack }: { onBack: () => void }) {
   const [books, setBooks] = useState<any[]>([])
   const [q, setQ] = useState('')
   const [course, setCourse] = useState('')
+  const [year, setYear] = useState<string>(() => (window as any).planLectorYear || '2025')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     load()
-  }, [course])
+  }, [course, year])
 
   const load = async () => {
     setLoading(true)
-    const data = await fetchPlanBooks({ course, q })
+    const data = await fetchPlanBooks({ year, course, q })
     setBooks(data)
     setLoading(false)
   }
@@ -23,14 +24,14 @@ export default function PlanLectorSection({ onBack }: { onBack: () => void }) {
     await load()
   }
 
-  const courses = Array.from(new Set(books.map(b => b.course))).sort()
+  const headerTitle = year === '2025' ? 'Plan Lector 2025 (Buscador)' : 'Plan Lector 2026 (Buscador)'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Plan Lector (Buscador)</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{headerTitle}</h1>
             <p className="text-sm text-gray-600">Busca por curso, título, autor o editorial</p>
           </div>
           <div>

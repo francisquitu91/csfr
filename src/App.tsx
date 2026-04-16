@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AdminLogin from './components/AdminLogin';
 import Historia from './components/Historia';
@@ -93,6 +92,10 @@ function App() {
 
   const handleBackToHome = () => {
     setCurrentPage('home');
+  };
+
+  const handleBackToBiblioteca = () => {
+    setCurrentPage('biblioteca');
   };
 
   const handleAdminLogin = () => {
@@ -265,7 +268,7 @@ function App() {
   }
 
   if (currentPage === 'plan-lector') {
-    return <PlanLectorSection onBack={handleBackToHome} />;
+    return <PlanLectorSection onBack={handleBackToBiblioteca} />;
   }
 
   if (currentPage === 'plan-lector-management') {

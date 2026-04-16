@@ -73,12 +73,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
       iconBg: 'bg-indigo-100 text-indigo-600'
     },
     {
-      id: 'biblioteca-management',
-      title: 'Gestión de Biblioteca',
-      description: 'Administrar planes lectores y recursos',
-      icon: <BookOpen className="w-8 h-8" />,
-      color: 'bg-amber-600 hover:bg-amber-700',
-      iconBg: 'bg-amber-100 text-amber-600'
+      id: 'plan-lector-management',
+      title: 'Gestión Plan Lector 2026',
+      description: 'Cargar y administrar el plan lector 2026',
+      icon: <FileText className="w-8 h-8" />,
+      color: 'bg-emerald-600 hover:bg-emerald-700',
+      iconBg: 'bg-emerald-100 text-emerald-600'
     },
     {
       id: 'utiles-escolares-management',

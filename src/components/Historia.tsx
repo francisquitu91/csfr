@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Users, MapPin, Award, BookOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Calendar, Users, MapPin, Award, BookOpen, X } from 'lucide-react';
 import DirectoryCarousel, { DirectoryItem } from './DirectoryCarousel';
 import FlipCard from './FlipCard';
 import { supabase } from '../lib/supabase';
@@ -34,7 +34,7 @@ const SelloCard: React.FC<{ title: string; description: string }> = ({ title, de
 };
 
 // Componente para la tarjeta del Padre Kentenich con PEI
-const PEICard: React.FC = () => {
+const PEICard: React.FC<{ onOpenViewer: () => void }> = ({ onOpenViewer }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -75,15 +75,15 @@ const PEICard: React.FC = () => {
           <BookOpen className="w-16 h-16 text-white mb-4" />
           <h4 className="text-2xl font-bold text-white text-center mb-4">Proyecto Educativo</h4>
           <p className="text-white text-center mb-6 opacity-90">Conoce nuestro Proyecto Educativo Institucional</p>
-          <a
-            href="https://drive.google.com/file/d/1H67PODGQISpVre6MwWvIFw1csDxU85yo/view"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
             className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-300"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenViewer();
+            }}
           >
             Ver Documento PEI
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -96,11 +96,48 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
   const [directoryMembers, setDirectoryMembers] = useState<DirectoryItem[]>([]);
   const [rectoriaMembers, setRectoriaMembers] = useState<DirectoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPEIViewer, setShowPEIViewer] = useState(false);
+  const peiIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const peiPresentationId = '19N_2apJTsztXiJ4yrxUv52LpNOoOIFANDNoh170Viwg';
+  const peiEmbedUrl = `https://docs.google.com/presentation/d/${peiPresentationId}/embed?start=false&loop=false&delayms=30000`;
+  const peiSlidesUrl = `https://docs.google.com/presentation/d/${peiPresentationId}/edit?usp=sharing`;
 
   useEffect(() => {
     setIsVisible(true);
     fetchDirectoryMembers();
   }, []);
+
+  useEffect(() => {
+    if (!showPEIViewer) return;
+
+    const focusViewer = () => {
+      peiIframeRef.current?.focus();
+      peiIframeRef.current?.click();
+    };
+
+    const timer = window.setTimeout(focusViewer, 200);
+    const retryFocus = window.setInterval(focusViewer, 800);
+
+    const handleViewerKeys = (event: KeyboardEvent) => {
+      if (
+        event.key === 'ArrowRight' ||
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown' ||
+        event.key === 'PageUp' ||
+        event.key === 'PageDown'
+      ) {
+        focusViewer();
+      }
+    };
+
+    window.addEventListener('keydown', handleViewerKeys);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearInterval(retryFocus);
+      window.removeEventListener('keydown', handleViewerKeys);
+    };
+  }, [showPEIViewer]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -310,7 +347,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
             <div className="grid lg:grid-cols-2 gap-8 items-center mb-12">
               {/* Image Padre Kentenich con PEI */}
               <div className="relative order-2 lg:order-1">
-                <PEICard />
+                <PEICard onOpenViewer={() => setShowPEIViewer(true)} />
                 <div className="text-center mt-4">
                   <p className="text-sm text-gray-500 italic">
                     💡 Haz clic en la tarjeta para acceder al Proyecto Educativo
@@ -428,6 +465,44 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+
+      {showPEIViewer && (
+        <div className="fixed inset-0 z-[100] bg-black/80">
+          <div className="absolute top-0 left-0 right-0 h-16 bg-black/70 flex items-center justify-between px-4 md:px-6">
+            <h3 className="text-white font-semibold">PEI - Proyecto Educativo Institucional</h3>
+            <div className="flex items-center gap-3">
+              <a
+                href={peiSlidesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Abrir en Slides
+              </a>
+              <button
+                onClick={() => setShowPEIViewer(false)}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cerrar
+              </button>
+            </div>
+          </div>
+
+          <iframe
+            ref={peiIframeRef}
+            title="PEI en pantalla completa"
+            src={peiEmbedUrl}
+            className="w-full h-full pt-16"
+            allow="autoplay"
+            tabIndex={0}
+            onLoad={() => {
+              peiIframeRef.current?.focus();
+              peiIframeRef.current?.click();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

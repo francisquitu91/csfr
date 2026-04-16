@@ -1,44 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, Search, Globe, FileText, Download, ExternalLink } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface BibliotecaSectionProps {
   onBack: () => void;
 }
 
-interface PlanLector {
-  id: number;
-  title: string;
-  file_url: string;
-  year: string;
-  created_at: string;
-}
-
 const BibliotecaSection: React.FC<BibliotecaSectionProps> = ({ onBack }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [planesLectores, setPlanesLectores] = useState<PlanLector[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const openPlanLector = (year: '2025' | '2026') => {
+    (window as any).planLectorYear = year;
+    if ((window as any).navigateTo) {
+      (window as any).navigateTo('plan-lector');
+    }
+  };
 
   useEffect(() => {
     setIsVisible(true);
-    fetchPlanesLectores();
   }, []);
-
-  const fetchPlanesLectores = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('planes_lectores')
-        .select('*')
-        .order('year', { ascending: false });
-
-      if (error) throw error;
-      if (data) setPlanesLectores(data);
-    } catch (error) {
-      console.error('Error fetching planes lectores:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
@@ -208,49 +187,48 @@ const BibliotecaSection: React.FC<BibliotecaSectionProps> = ({ onBack }) => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
-              </div>
-            ) : planesLectores.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {planesLectores.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-amber-500"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-amber-100 p-3 rounded-lg">
-                        <FileText className="w-8 h-8 text-amber-600" />
-                      </div>
-                      <span className="bg-amber-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        {plan.year}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-3">
-                      {plan.title}
-                    </h3>
-                    <button
-                      onClick={() => (window as any).navigateTo && (window as any).navigateTo('plan-lector')}
-                      className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-2 rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 group"
-                    >
-                      <FileText className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-                      <span>Ir al Plan Lector</span>
-                    </button>
+            <div className="grid md:grid-cols-2 gap-6 mb-10">
+              <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-500">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="bg-blue-100 p-3 rounded-lg">
+                    <Search className="w-8 h-8 text-blue-600" />
                   </div>
-                ))}
+                  <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    2025
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Plan Lector 2025 (Buscador)</h3>
+                <p className="text-sm text-gray-600 mb-4">Versión actual del buscador de libros para el plan lector 2025.</p>
+                <button
+                  onClick={() => openPlanLector('2025')}
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 group"
+                >
+                  <Search className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+                  <span>Ir al Plan Lector</span>
+                </button>
               </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">
-                  No hay planes lectores disponibles en este momento.
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  Los documentos se publicarán próximamente.
-                </p>
+
+              <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-emerald-500">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="bg-emerald-100 p-3 rounded-lg">
+                    <Search className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    2026
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Plan Lector 2026 (Buscador)</h3>
+                <p className="text-sm text-gray-600 mb-4">Nuevo bloque autogestionable desde admin para el plan lector 2026.</p>
+                <button
+                  onClick={() => openPlanLector('2026')}
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-300 group"
+                >
+                  <Search className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+                  <span>Ir al Plan Lector</span>
+                </button>
               </div>
-            )}
+            </div>
+
           </div>
         </div>
       </div>

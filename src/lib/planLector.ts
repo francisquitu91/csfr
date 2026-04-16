@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 
 export interface PlanBook {
   id: string
+  year?: string
   course: string
   category?: string
   unit?: string
@@ -16,9 +17,15 @@ export interface PlanBook {
   updated_at?: string
 }
 
-export async function fetchPlanBooks(filters: { course?: string; q?: string } = {}): Promise<PlanBook[]> {
+export async function fetchPlanBooks(filters: { year?: string; course?: string; q?: string } = {}): Promise<PlanBook[]> {
   try {
     let query = supabase.from('plan_lector_books').select('*')
+    if (filters.year === '2025') {
+      // 2025 must preserve the original legacy content, which may have no year assigned.
+      query = query.or('year.is.null,year.eq.2025')
+    } else if (filters.year) {
+      query = query.eq('year', filters.year)
+    }
     if (filters.course) query = query.eq('course', filters.course)
     if (filters.q) {
       const q = filters.q.trim()
@@ -32,7 +39,7 @@ export async function fetchPlanBooks(filters: { course?: string; q?: string } = 
     const seen = new Set<string>()
     const deduped: PlanBook[] = []
     for (const r of rows) {
-      const key = `${r.course}||${r.title}||${r.author||''}||${r.editorial||''}`.toLowerCase()
+      const key = `${r.year || ''}||${r.course}||${r.title}||${r.author||''}||${r.editorial||''}`.toLowerCase()
       if (!seen.has(key)) {
         seen.add(key)
         deduped.push(r)
