@@ -270,7 +270,7 @@ const PastoralJuvenilSection: React.FC<PastoralJuvenilSectionProps> = ({ onBack 
         {/* Core Members */}
         <div className={`bg-white rounded-lg shadow-lg p-8 mb-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h3 className="text-2xl font-bold text-purple-900 mb-6 text-center">
-            Alumnos Núcleo Pastoral Juvenil 2025
+            Alumnos Núcleo Pastoral Juvenil 2026
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coreMembers.map((member) => (

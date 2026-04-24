@@ -22,6 +22,8 @@ interface ProcessStep {
   description: string;
   icon: React.ReactNode;
   color: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 interface InfoSection {
@@ -228,7 +230,9 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
       title: 'Postula',
       description: 'Completa el formulario de postulación con los datos de tu familia.',
       icon: <FileText className="w-20 h-20" />,
-      color: 'bg-green-600'
+      color: 'bg-green-600',
+      ctaLabel: 'Ir a Colegium',
+      ctaHref: 'https://schoolnet.colegium.com/webapp/es_CL/login'
     },
     {
       id: 3,
@@ -267,7 +271,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
 
   // Información de contacto
   const contactPerson: ContactPerson = {
-    name: 'Jennifer Martínez',
+    name: 'Jennifer Nielsen Varela',
     role: 'Encargada de Admisión',
     email: 'admision@sagradafamilia.cl',
     phone: '9 3242 2220',
@@ -305,7 +309,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
               className="flex items-center space-x-2 px-6 py-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 whitespace-nowrap border-b-2 border-transparent hover:border-blue-600 flex-shrink-0"
             >
               <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold">Nuestros sellos educativos</span>
+              <span className="font-semibold">Nuestro Proceso de Admisión</span>
             </button>
             
             <button
@@ -346,7 +350,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
         <div id="por-que-elegirnos" className={`mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="text-center mb-6">
             <h2 className="text-4xl font-semibold text-[#2E3A87] mb-2">
-              Nuestros sellos educativos
+              Nuestro Proceso de Admisión
             </h2>
             <div className="w-48 h-1 bg-[#8B5E3C] mx-auto rounded"></div>
           </div>
@@ -433,6 +437,17 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                 <div className="mt-3 text-sm text-white/90 text-center">
                   {step.description}
                 </div>
+
+                {step.ctaLabel && step.ctaHref && (
+                  <a
+                    href={step.ctaHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-green-700 shadow-md transition-transform hover:scale-105"
+                  >
+                    {step.ctaLabel}
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -479,7 +494,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
 
                 <div
                   className={`transition-all duration-500 overflow-hidden ${
-                    expandedInfo === section.id ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'
+                    expandedInfo === section.id ? 'max-h-[2600px] sm:max-h-[1800px] opacity-100' : 'max-h-0 opacity-0'
                   }`}
                 >
                   <div className="px-6 pb-6">

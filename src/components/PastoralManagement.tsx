@@ -16,7 +16,7 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
   const [success, setSuccess] = useState<string | null>(null);
   const [editingCore, setEditingCore] = useState<any>(null);
   const [editingTeacher, setEditingTeacher] = useState<any>(null);
-  const [newCore, setNewCore] = useState({ name: '', order_index: 0, year: 2025 });
+  const [newCore, setNewCore] = useState({ name: '', order_index: 0, year: 2026 });
   const [newTeacher, setNewTeacher] = useState({ name: '', order_index: 0 });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
       } else {
         await supabase.from('pastoral_core_members').insert([newCore]);
         setSuccess('Miembro agregado');
-        setNewCore({ name: '', order_index: 0, year: 2025 });
+        setNewCore({ name: '', order_index: 0, year: 2026 });
       }
       setEditingCore(null);
       fetchData();

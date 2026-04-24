@@ -52,12 +52,12 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       href: '#',
       dropdown: [
         'BIBLIOTECA',
-        'ÚTILES ESCOLARES',
         'CASINO',
-        'UNIFORMES ESCOLARES',
         'HORARIOS',
+        'UNIFORMES ESCOLARES',
+        'ÚTILES ESCOLARES',
+        'FECHAS IMPORTANTES',
         'PAGOS',
-        'FECHAS IMPORTANTES'
       ]
     }
   ];

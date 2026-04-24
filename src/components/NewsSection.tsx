@@ -155,7 +155,7 @@ const NewsSection: React.FC = () => {
                     <img
                       src={images[currentIndex]}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-gray-100 scale-[1.35] sm:scale-125"
                     />
                     
                     {/* Date Badge */}

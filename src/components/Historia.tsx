@@ -47,7 +47,7 @@ const PEICard: React.FC<{ onOpenViewer: () => void }> = ({ onOpenViewer }) => {
         <div className="flip-card-front rounded-lg shadow-xl overflow-hidden relative">
           {/* Imagen de fondo */}
           <img
-            src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2018/08/foto-mision-vision.jpg"
+            src="https://i.postimg.cc/hGnvQBkk/abrazo.jpg"
             alt="Padre José Kentenich"
             className="w-full h-full object-cover"
           />
@@ -437,7 +437,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
                   <p className="text-gray-600">Cargando miembros del directorio...</p>
                 </div>
               ) : directoryMembers.length > 0 ? (
-                <DirectoryCarousel items={directoryMembers} />
+                <DirectoryCarousel items={directoryMembers} itemsPerPage={5} />
               ) : (
                 <p className="text-center text-gray-600 py-4">No hay miembros del directorio registrados.</p>
               )}
@@ -457,7 +457,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
                   <p className="text-gray-600">Cargando equipo directivo...</p>
                 </div>
               ) : rectoriaMembers.length > 0 ? (
-                <DirectoryCarousel items={rectoriaMembers} />
+                <DirectoryCarousel items={rectoriaMembers} itemsPerPage={3} disablePagination={true} compactCards={true} />
               ) : (
                 <p className="text-center text-gray-600 py-4">No hay miembros del equipo directivo registrados.</p>
               )}

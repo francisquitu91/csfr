@@ -254,14 +254,14 @@ const UniformesEscolaresManagement: React.FC<UniformesEscolaresManagementProps> 
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Archivo (PDF, Word o imagen)
+                    Foto o Documento (Imagen, PDF, Word)
                   </label>
                   <div className="flex items-center space-x-4">
                     <label className="flex-1 cursor-pointer">
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors">
                         <div className="flex items-center justify-center space-x-2 text-gray-600">
                           <Upload className="w-5 h-5" />
-                          <span>{uploadingFile ? 'Subiendo...' : 'Haz clic para subir archivo'}</span>
+                          <span>{uploadingFile ? 'Subiendo...' : 'Haz clic para subir foto o documento'}</span>
                         </div>
                       </div>
                       <input

@@ -60,13 +60,13 @@ const EducadoresSection: React.FC<EducadoresSectionProps> = ({ onBack }) => {
       </div>
 
       {/* Hero Image Section */}
-      <div className={`relative h-[600px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative h-[420px] sm:h-[500px] lg:h-[560px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
           src="https://i.postimg.cc/Fsk558RR/educadores.jpg"
           alt="Educadores del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

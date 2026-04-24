@@ -8,17 +8,25 @@ export interface DirectoryItem {
 
 interface DirectoryCarouselProps {
   items: DirectoryItem[];
+  itemsPerPage?: number;
+  disablePagination?: boolean;
+  compactCards?: boolean;
 }
 
-const DirectoryCarousel: React.FC<DirectoryCarouselProps> = ({ items }) => {
-  const itemsPerPage = 3;
+const DirectoryCarousel: React.FC<DirectoryCarouselProps> = ({
+  items,
+  itemsPerPage = 3,
+  disablePagination = false,
+  compactCards = false,
+}) => {
   const [currentPage, setCurrentPage] = useState(0);
 
-  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const effectiveItemsPerPage = disablePagination ? items.length : itemsPerPage;
+  const totalPages = Math.ceil(items.length / effectiveItemsPerPage);
   const visibleItems = useMemo(() => {
-    const start = currentPage * itemsPerPage;
-    return items.slice(start, start + itemsPerPage);
-  }, [currentPage, items]);
+    const start = currentPage * effectiveItemsPerPage;
+    return items.slice(start, start + effectiveItemsPerPage);
+  }, [currentPage, items, effectiveItemsPerPage]);
 
   const goToPrevious = () => {
     setCurrentPage((prev) => (prev > 0 ? prev - 1 : prev));
@@ -28,19 +36,26 @@ const DirectoryCarousel: React.FC<DirectoryCarouselProps> = ({ items }) => {
     setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
   };
 
+  const displayItemsPerPage = disablePagination ? items.length : itemsPerPage;
+  const gridColsClass = displayItemsPerPage === 5 ? 'md:grid-cols-5 lg:grid-cols-5' : displayItemsPerPage === 4 ? 'md:grid-cols-4 lg:grid-cols-4' : 'md:grid-cols-3 lg:grid-cols-3';
+  const textSizeClass = displayItemsPerPage >= 5 ? 'text-xs' : displayItemsPerPage === 4 ? 'text-sm' : 'text-sm';
+
   return (
     <div className="py-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridColsClass} gap-4 md:gap-6`}>
         {visibleItems.map((item, index) => (
-          <div key={`${item.name}-${index}`} className="flex flex-col items-center space-y-3 p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105">
-            <div className="w-full aspect-square overflow-hidden rounded-lg border-4 border-blue-100 bg-gray-100 flex items-center justify-center">
+          <div
+            key={`${item.name}-${index}`}
+            className={`flex flex-col items-center space-y-3 p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105 ${compactCards ? 'max-w-[210px] w-full mx-auto' : ''}`}
+          >
+            <div className="w-full aspect-square overflow-hidden rounded-lg border-4 border-blue-100 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
               <img
                 src={item.photoUrl}
                 alt={item.name}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain p-2"
               />
             </div>
-            <p className="text-center text-gray-800 font-medium text-sm leading-tight">
+            <p className={`text-center text-gray-800 font-medium ${textSizeClass} leading-tight`}>
               {item.name}
             </p>
           </div>

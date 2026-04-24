@@ -44,6 +44,28 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
   const [editingSection, setEditingSection] = useState<InfoSectionForm | null>(null);
   const [editingVacante, setEditingVacante] = useState<Vacante | null>(null);
 
+  const extractStoragePath = (publicUrl: string) => {
+    const marker = '/object/public/institutional-documents/';
+    const markerIndex = publicUrl.indexOf(marker);
+    if (markerIndex === -1) return null;
+    return decodeURIComponent(publicUrl.slice(markerIndex + marker.length));
+  };
+
+  const removeStoredFile = async (publicUrl?: string | null) => {
+    if (!publicUrl) return;
+
+    const storagePath = extractStoragePath(publicUrl);
+    if (!storagePath) return;
+
+    const { error } = await supabase.storage
+      .from('institutional-documents')
+      .remove([storagePath]);
+
+    if (error) {
+      console.error('Error removing stored file:', error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -110,6 +132,7 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
       let fileName = section.file_name ?? null;
 
       if (section.file) {
+        await removeStoredFile(section.file_url);
         const uploadedFile = await uploadSectionFile(section.file);
         fileUrl = uploadedFile.fileUrl;
         fileName = uploadedFile.fileName;
@@ -157,6 +180,11 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
     
     setLoading(true);
     try {
+      const sectionToDelete = infoSections.find((section) => section.id === id);
+      if (sectionToDelete?.file_url) {
+        await removeStoredFile(sectionToDelete.file_url);
+      }
+
       await supabase
         .from('admision_info_sections')
         .delete()
@@ -213,6 +241,30 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
     } catch (error) {
       console.error('Error deleting vacante:', error);
       setMessage('Error al eliminar vacante');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSectionFile = async (section: InfoSection) => {
+    if (!section.file_url || !section.id) return;
+
+    if (!confirm('¿Estás seguro de eliminar el archivo adjunto de esta sección?')) return;
+
+    setLoading(true);
+    try {
+      await removeStoredFile(section.file_url);
+
+      await supabase
+        .from('admision_info_sections')
+        .update({ file_url: null, file_name: null })
+        .eq('id', section.id);
+
+      setMessage('Archivo eliminado');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting section file:', error);
+      setMessage('Error al eliminar archivo');
     } finally {
       setLoading(false);
     }
@@ -451,6 +503,15 @@ const AdmisionManagement: React.FC<AdmisionManagementProps> = ({ onBack }) => {
                           <span>Orden: {section.order_index}</span>
                           {section.file_url && <span>Documento: {section.file_name || 'Adjunto'}</span>}
                         </div>
+                        {section.file_url && (
+                          <button
+                            onClick={() => handleDeleteSectionFile(section)}
+                            className="mt-3 inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Eliminar archivo</span>
+                          </button>
+                        )}
                       </div>
                       <div className="flex space-x-2 ml-4">
                         <button

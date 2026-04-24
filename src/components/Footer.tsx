@@ -28,7 +28,7 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
             {/* Additional Logo */}
             <div className="flex items-center">
               <img 
-                src="https://uemtn.edu.ec/wp-content/uploads/2025/04/logos1.png"
+                src="https://i.postimg.cc/vTFqYRdX/red-de-colegios.png"
                 alt="Logo Adicional"
                 className="h-16 w-auto object-contain"
               />
