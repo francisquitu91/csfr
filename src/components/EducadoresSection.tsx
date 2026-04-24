@@ -59,24 +59,24 @@ const EducadoresSection: React.FC<EducadoresSectionProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Hero Image Section */}
-      <div className={`relative h-[420px] sm:h-[500px] lg:h-[560px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <img
-          src="https://i.postimg.cc/Fsk558RR/educadores.jpg"
-          alt="Educadores del Colegio Sagrada Familia"
-          className="w-full h-full object-cover object-top"
-        />
-        <div className="absolute inset-0 bg-black/20"></div>
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Perfil del Educador Section */}
         <div id="perfil-educador" className={`bg-white rounded-lg shadow-lg p-8 mb-12 transition-all duration-1000 scroll-mt-24 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Perfil del Educador</h2>
-            <p className="text-gray-700 leading-relaxed mb-6 text-lg">
+            <p className="text-gray-700 leading-relaxed mb-8 text-lg max-w-4xl mx-auto">
               Nuestros educadores son agentes de cambio que educan desde el vínculo y el testimonio.
             </p>
+
+            <div className="mx-auto overflow-hidden rounded-2xl max-w-5xl">
+              <div className="h-[340px] sm:h-[440px] lg:h-[620px]">
+                <img
+                  src="https://i.postimg.cc/Fsk558RR/educadores.jpg"
+                  alt="Educadores del Colegio Sagrada Familia"
+                  className="w-full h-full object-contain object-center"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
