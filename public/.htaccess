@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Redirect legacy /www/* URLs to root
+RewriteRule ^www/?$ / [R=301,L]
+RewriteRule ^www/(.*)$ /$1 [R=301,L]
+
+# SPA fallback for React/Vite routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
