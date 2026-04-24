@@ -50,6 +50,7 @@ import MapSection from './components/MapSection';
 import Footer from './components/Footer';
 import PlanLectorSection from './components/PlanLectorSection';
 import PlanLectorManagement from './components/PlanLectorManagement';
+import PEIViewerSection from './components/PEIViewerSection';
 
 const backgroundImages = [
   'https://i.postimg.cc/kgTkxtpM/pastoral.jpg',
@@ -265,6 +266,10 @@ function App() {
 
   if (currentPage === 'proyecto-educativo') {
     return <ProyectoEducativo onBack={handleBackToHome} />;
+  }
+
+  if (currentPage === 'pei-proyecto-educativo') {
+    return <PEIViewerSection onBack={handleBackToHome} />;
   }
 
   if (currentPage === 'plan-lector') {

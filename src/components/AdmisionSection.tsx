@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Mail, MapPin, Phone, FileText, Users, CheckCircle, ChevronDown, Calendar, Banknote } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Mail, MapPin, Phone, FileText, Users, CheckCircle, ChevronDown, Calendar, Banknote, BookOpen, X, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AdmisionSectionProps {
@@ -24,6 +24,7 @@ interface ProcessStep {
   color: string;
   ctaLabel?: string;
   ctaHref?: string;
+  ctaAction?: () => void;
 }
 
 interface InfoSection {
@@ -61,6 +62,16 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
   const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [fechaActualizacion, setFechaActualizacion] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [showPEIViewer, setShowPEIViewer] = useState(false);
+  const [peiLoaded, setPeiLoaded] = useState(false);
+  const peiIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const peiPresentationId = '19N_2apJTsztXiJ4yrxUv52LpNOoOIFANDNoh170Viwg';
+  const peiEmbedUrl = `https://docs.google.com/presentation/d/${peiPresentationId}/embed?start=false&loop=false&delayms=30000`;
+
+  const openPEIViewer = () => {
+    setPeiLoaded(false);
+    setShowPEIViewer(true);
+  };
 
   useEffect(() => {
     setIsVisible(true);
@@ -222,7 +233,9 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
           <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
         </svg>
       ),
-      color: 'bg-blue-600'
+      color: 'bg-blue-600',
+      ctaLabel: 'Ir a Proyecto Educativo Institucional',
+      ctaAction: openPEIViewer
     },
     {
       id: 2,
@@ -232,7 +245,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
       icon: <FileText className="w-20 h-20" />,
       color: 'bg-green-600',
       ctaLabel: 'Ir a Colegium',
-      ctaHref: 'https://schoolnet.colegium.com/webapp/es_CL/login'
+      ctaHref: 'https://colegiosagradafamilia.postulaciones.colegium.com/loginColegio'
     },
     {
       id: 3,
@@ -438,7 +451,17 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
                   {step.description}
                 </div>
 
-                {step.ctaLabel && step.ctaHref && (
+                {step.ctaLabel && step.ctaAction && (
+                  <button
+                    type="button"
+                    onClick={step.ctaAction}
+                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-blue-700 shadow-md transition-transform hover:scale-105"
+                  >
+                    {step.ctaLabel}
+                  </button>
+                )}
+
+                {step.ctaLabel && step.ctaHref && !step.ctaAction && (
                   <a
                     href={step.ctaHref}
                     target="_blank"
@@ -626,6 +649,42 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+
+      {showPEIViewer && (
+        <div className="fixed inset-0 z-[100] bg-black/80">
+          <div className="absolute top-0 left-0 right-0 h-16 bg-black/70 flex items-center justify-between px-4 md:px-6">
+            <h3 className="text-white font-semibold">PEI - Proyecto Educativo Institucional</h3>
+            <button
+              onClick={() => setShowPEIViewer(false)}
+              className="inline-flex items-center gap-2 bg-white text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cerrar
+            </button>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 top-16 bg-black">
+            {!peiLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center text-white">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white" />
+                  <p className="text-sm text-white/80">Cargando PEI...</p>
+                </div>
+              </div>
+            )}
+
+            <iframe
+              ref={peiIframeRef}
+              title="PEI en pantalla completa"
+              src={peiEmbedUrl}
+              className="absolute inset-0 h-full w-full"
+              allow="autoplay; fullscreen"
+              tabIndex={0}
+              onLoad={() => setPeiLoaded(true)}
+            />
+          </div>
+        </div>
+      )}
 
           <style>{`
             .perspective-1000 {

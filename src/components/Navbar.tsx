@@ -57,7 +57,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
         'UNIFORMES ESCOLARES',
         'ÚTILES ESCOLARES',
         'FECHAS IMPORTANTES',
-        'PAGOS',
       ]
     }
   ];
@@ -149,11 +148,6 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setIsMenuOpen(false);
     } else if (itemName === 'HORARIOS') {
       onPageChange('horarios');
-      setActiveDropdown(null);
-      setActiveSubDropdown(null);
-      setIsMenuOpen(false);
-    } else if (itemName === 'PAGOS') {
-      onPageChange('pagos');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);

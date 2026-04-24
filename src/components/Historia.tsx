@@ -100,7 +100,6 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
   const peiIframeRef = useRef<HTMLIFrameElement | null>(null);
   const peiPresentationId = '19N_2apJTsztXiJ4yrxUv52LpNOoOIFANDNoh170Viwg';
   const peiEmbedUrl = `https://docs.google.com/presentation/d/${peiPresentationId}/embed?start=false&loop=false&delayms=30000`;
-  const peiSlidesUrl = `https://docs.google.com/presentation/d/${peiPresentationId}/edit?usp=sharing`;
 
   useEffect(() => {
     setIsVisible(true);
@@ -470,23 +469,13 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
         <div className="fixed inset-0 z-[100] bg-black/80">
           <div className="absolute top-0 left-0 right-0 h-16 bg-black/70 flex items-center justify-between px-4 md:px-6">
             <h3 className="text-white font-semibold">PEI - Proyecto Educativo Institucional</h3>
-            <div className="flex items-center gap-3">
-              <a
-                href={peiSlidesUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Abrir en Slides
-              </a>
-              <button
-                onClick={() => setShowPEIViewer(false)}
-                className="inline-flex items-center gap-2 bg-white text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cerrar
-              </button>
-            </div>
+            <button
+              onClick={() => setShowPEIViewer(false)}
+              className="inline-flex items-center gap-2 bg-white text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cerrar
+            </button>
           </div>
 
           <iframe
