@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, Download, Calendar, FileType, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { resolveDocumentAccess } from '../lib/institutionalDocuments';
+import { getDocumentFormatAccent, getDocumentFormatLabel, resolveDocumentAccess } from '../lib/institutionalDocuments';
 
 interface InstitutionalDocumentsProps {
   onBack: () => void;
@@ -223,12 +223,12 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
                           </div>
 
                           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <div className="flex items-center space-x-1">
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${getDocumentFormatAccent(doc.file_type, doc.file_name)}`}>
                                 <FileType className="w-4 h-4" />
-                                <span>{doc.file_type.split('/')[1]?.toUpperCase() || 'FILE'}</span>
+                                <span>{getDocumentFormatLabel(doc.file_type, doc.file_name)}</span>
                               </div>
-                              <div className="flex items-center space-x-1">
+                              <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-gray-700">
                                 <Calendar className="w-4 h-4" />
                                 <span>{formatFileSize(doc.file_size)}</span>
                               </div>

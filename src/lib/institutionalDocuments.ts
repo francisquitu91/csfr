@@ -111,3 +111,35 @@ export const resolveDocumentAccess = (document: InstitutionalDocumentRecord): Re
 
   return null;
 };
+
+export const getDocumentFormatLabel = (fileType: string, fileName?: string) => {
+  const normalizedType = fileType.toLowerCase();
+  const normalizedName = fileName?.toLowerCase() || '';
+
+  if (normalizedType.includes('pdf') || normalizedName.endsWith('.pdf')) return 'PDF';
+  if (normalizedType.includes('wordprocessingml.document') || normalizedType.includes('msword') || normalizedName.endsWith('.docx') || normalizedName.endsWith('.doc')) return 'Word';
+  if (normalizedType.includes('spreadsheetml.sheet') || normalizedType.includes('excel') || normalizedName.endsWith('.xlsx') || normalizedName.endsWith('.xls')) return 'Excel';
+  if (normalizedType.includes('presentationml.presentation') || normalizedType.includes('powerpoint') || normalizedName.endsWith('.pptx') || normalizedName.endsWith('.ppt')) return 'PowerPoint';
+  if (normalizedType.includes('image') || normalizedName.match(/\.(png|jpe?g|gif|webp|svg)$/)) return 'Imagen';
+
+  return 'Archivo';
+};
+
+export const getDocumentFormatAccent = (fileType: string, fileName?: string) => {
+  const label = getDocumentFormatLabel(fileType, fileName);
+
+  switch (label) {
+    case 'PDF':
+      return 'bg-red-100 text-red-700';
+    case 'Word':
+      return 'bg-blue-100 text-blue-700';
+    case 'Excel':
+      return 'bg-emerald-100 text-emerald-700';
+    case 'PowerPoint':
+      return 'bg-orange-100 text-orange-700';
+    case 'Imagen':
+      return 'bg-purple-100 text-purple-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+};
