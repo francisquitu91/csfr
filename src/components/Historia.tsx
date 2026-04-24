@@ -456,7 +456,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
                   <p className="text-gray-600">Cargando equipo directivo...</p>
                 </div>
               ) : rectoriaMembers.length > 0 ? (
-                <DirectoryCarousel items={rectoriaMembers} itemsPerPage={3} disablePagination={true} compactCards={true} />
+                <DirectoryCarousel items={rectoriaMembers} itemsPerPage={3} disablePagination={true} />
               ) : (
                 <p className="text-center text-gray-600 py-4">No hay miembros del equipo directivo registrados.</p>
               )}
