@@ -103,3 +103,20 @@ export interface AdmisionInfoSection {
   updated_at: string;
 }
 
+export interface InstitutionalDocument {
+  id: string;
+  category: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_name: string;
+  file_type: string;
+  file_size: number | null;
+  order_index: number;
+  created_at: string;
+  updated_at?: string;
+  visualization_url?: string | null;
+  download_url?: string | null;
+  use_visualization_link?: boolean;
+}
+

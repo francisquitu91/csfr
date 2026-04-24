@@ -17,6 +17,7 @@ import DepartamentoOrientacionManagement from './components/DepartamentoOrientac
 
 import InstitutionalDocuments from './components/InstitutionalDocuments';
 import InstitutionalDocumentsManagement from './components/InstitutionalDocumentsManagement';
+import InternalManagement from './components/InternalManagement';
 import CEALSection from './components/CEALSection';
 import FamiliaSection from './components/FamiliaSection';
 import EducadoresSection from './components/EducadoresSection';
@@ -161,6 +162,10 @@ function App() {
 
   if (currentPage === 'institutional-documents-management') {
     return <InstitutionalDocumentsManagement onBack={handleBackToAdmin} />;
+  }
+
+  if (currentPage === 'internal-management') {
+    return <InternalManagement onBack={handleBackToAdmin} />;
   }
 
   if (currentPage === 'ceal-management') {

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Edit2, Trash2, Save, X, Upload, Loader2, FileText, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import {
+  extractSupabaseStoragePath,
+  normalizeVisualizationLink,
+  resolveDocumentAccess,
+} from '../lib/institutionalDocuments';
 
 interface InstitutionalDocumentsManagementProps {
   onBack: () => void;
@@ -17,6 +22,9 @@ interface Document {
   file_size: number | null;
   order_index: number;
   created_at: string;
+  visualization_url?: string | null;
+  download_url?: string | null;
+  use_visualization_link?: boolean;
 }
 
 interface DocumentForm {
@@ -25,7 +33,37 @@ interface DocumentForm {
   description: string;
   file: File | null;
   order_index: number;
+  useVisualizationLink: boolean;
+  visualizationLink: string;
 }
+
+const emptyFormData: DocumentForm = {
+  category: 'Documentos de Matrícula 2026',
+  title: '',
+  description: '',
+  file: null,
+  order_index: 0,
+  useVisualizationLink: false,
+  visualizationLink: ''
+};
+
+const normalizeDocument = (document: Document): Document => {
+  const access = resolveDocumentAccess(document);
+
+  if (!access) {
+    return {
+      ...document,
+      use_visualization_link: document.use_visualization_link ?? false
+    };
+  }
+
+  return {
+    ...document,
+    visualization_url: access.visualizationUrl,
+    download_url: access.downloadUrl,
+    use_visualization_link: true
+  };
+};
 
 const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagementProps> = ({ onBack }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -36,13 +74,7 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<DocumentForm>({
-    category: 'Documentos de Matrícula 2026',
-    title: '',
-    description: '',
-    file: null,
-    order_index: 0
-  });
+  const [formData, setFormData] = useState<DocumentForm>(emptyFormData);
 
   const categories = [
     'Documentos de Matrícula 2026',
@@ -65,7 +97,7 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
         .order('order_index');
 
       if (error) throw error;
-      setDocuments(data || []);
+      setDocuments((data || []).map((document) => normalizeDocument(document)));
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError('Error al cargar los documentos');
@@ -77,6 +109,19 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({ ...formData, file: e.target.files[0] });
+    }
+  };
+
+  const removeStoredFile = async (publicUrl?: string | null) => {
+    const storagePath = extractSupabaseStoragePath(publicUrl);
+    if (!storagePath) return;
+
+    const { error } = await supabase.storage
+      .from('institutional-documents')
+      .remove([storagePath]);
+
+    if (error) {
+      console.error('Error removing stored file:', error);
     }
   };
 
@@ -113,8 +158,24 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
       return;
     }
 
+    if (formData.useVisualizationLink && !formData.visualizationLink.trim()) {
+      setError('Debe ingresar el enlace de visualización');
+      return;
+    }
+
     try {
       setUploading(true);
+
+      const normalizedLink = formData.useVisualizationLink
+        ? normalizeVisualizationLink(formData.visualizationLink)
+        : null;
+
+      const existingDocument = editingId
+        ? documents.find((document) => document.id === editingId)
+        : null;
+      const previousFileUrl = formData.file && editingId && existingDocument
+        ? existingDocument.file_url
+        : null;
 
       let fileUrl = '';
       let fileName = '';
@@ -128,6 +189,10 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
         fileSize = formData.file.size;
       }
 
+      const visualizationUrl = normalizedLink?.visualizationUrl || null;
+      const downloadUrl = normalizedLink?.downloadUrl || null;
+      const useVisualizationLink = Boolean(normalizedLink);
+
       if (editingId) {
         // Update existing document
         const updateData: any = {
@@ -135,7 +200,10 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
           title: formData.title,
           description: formData.description || null,
           order_index: formData.order_index,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          visualization_url: visualizationUrl,
+          download_url: downloadUrl,
+          use_visualization_link: useVisualizationLink
         };
 
         // Only update file fields if a new file was uploaded
@@ -165,7 +233,10 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
             file_name: fileName,
             file_type: fileType,
             file_size: fileSize,
-            order_index: formData.order_index
+            order_index: formData.order_index,
+            visualization_url: visualizationUrl,
+            download_url: downloadUrl,
+            use_visualization_link: useVisualizationLink
           }]);
 
         if (error) throw error;
@@ -174,14 +245,14 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
 
       // Reset form
       setFormData({
-        category: 'Documentos de Matrícula 2026',
-        title: '',
-        description: '',
-        file: null,
-        order_index: 0
+        ...emptyFormData,
+        category: 'Documentos de Matrícula 2026'
       });
       setIsEditing(false);
       setEditingId(null);
+      if (previousFileUrl) {
+        await removeStoredFile(previousFileUrl);
+      }
       fetchDocuments();
     } catch (error: any) {
       console.error('Error saving document:', error);
@@ -192,12 +263,16 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
   };
 
   const handleEdit = (doc: Document) => {
+    const access = resolveDocumentAccess(doc);
+
     setFormData({
       category: doc.category,
       title: doc.title,
       description: doc.description || '',
       file: null,
-      order_index: doc.order_index
+      order_index: doc.order_index,
+      useVisualizationLink: Boolean(access),
+      visualizationLink: access?.visualizationUrl || ''
     });
     setEditingId(doc.id);
     setIsEditing(true);
@@ -209,6 +284,9 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
     if (!confirm('¿Está seguro de que desea eliminar este documento?')) return;
 
     try {
+      const document = documents.find((item) => item.id === id);
+      await removeStoredFile(document?.file_url);
+
       const { error } = await supabase
         .from('institutional_documents')
         .delete()
@@ -225,11 +303,8 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
 
   const handleCancel = () => {
     setFormData({
-      category: 'Documentos de Matrícula 2026',
-      title: '',
-      description: '',
-      file: null,
-      order_index: 0
+      ...emptyFormData,
+      category: 'Documentos de Matrícula 2026'
     });
     setIsEditing(false);
     setEditingId(null);
@@ -454,7 +529,10 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-600">{doc.file_name}</span>
+                        <div className="text-sm text-gray-600">{doc.file_name}</div>
+                        <div className={`mt-1 inline-flex rounded-full px-2 py-1 text-xs font-semibold ${resolveDocumentAccess(doc) ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {resolveDocumentAccess(doc) ? 'Visualización activa' : 'Archivo local'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-600">{formatFileSize(doc.file_size)}</span>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, Download, Calendar, FileType, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { resolveDocumentAccess } from '../lib/institutionalDocuments';
 
 interface InstitutionalDocumentsProps {
   onBack: () => void;
@@ -17,6 +18,9 @@ interface Document {
   file_size: number | null;
   order_index: number;
   created_at: string;
+  visualization_url?: string | null;
+  download_url?: string | null;
+  use_visualization_link?: boolean;
 }
 
 const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack }) => {
@@ -24,6 +28,7 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [isVisible, setIsVisible] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
 
   const categories = [
     { id: 'all', name: 'Todos', color: 'blue' },
@@ -80,6 +85,10 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const closePreview = () => {
+    setPreviewDocument(null);
   };
 
   const MATR_2025 = 'Documentos de Matrícula 2025';
@@ -191,7 +200,10 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
                     </h2>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      {docs.map((doc) => (
+                      {docs.map((doc) => {
+                        const access = resolveDocumentAccess(doc);
+
+                        return (
                         <div
                           key={doc.id}
                           className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 hover:border-blue-300 group"
@@ -222,16 +234,29 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
                               </div>
                             </div>
 
-                            <button
-                              onClick={() => handleDownload(doc.file_url, doc.file_name)}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 transform hover:scale-105"
-                            >
-                              <Download className="w-4 h-4" />
-                              <span>Descargar</span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                              {access && (
+                                <button
+                                  onClick={() => setPreviewDocument(doc)}
+                                  className="flex items-center space-x-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors duration-300 transform hover:scale-105"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                  <span>Visualizar</span>
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => handleDownload(access?.downloadUrl || doc.file_url, doc.file_name)}
+                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 transform hover:scale-105"
+                              >
+                                <Download className="w-4 h-4" />
+                                <span>Descargar</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -240,6 +265,34 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
           </div>
         )}
       </div>
+
+      {previewDocument && (() => {
+        const access = resolveDocumentAccess(previewDocument);
+
+        if (!access) return null;
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/80">
+            <div className="absolute top-0 left-0 right-0 h-16 bg-black/70 flex items-center justify-between px-4 md:px-6 z-10">
+              <h3 className="text-white font-semibold">Visualización del documento</h3>
+              <button
+                onClick={closePreview}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 rotate-45" />
+                Cerrar
+              </button>
+            </div>
+
+            <iframe
+              title={previewDocument.title}
+              src={access.visualizationUrl}
+              className="w-full h-full pt-16 bg-black"
+              allow="autoplay"
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 };

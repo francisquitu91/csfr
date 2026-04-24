@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Users, ArrowLeft, LogOut, BookOpen, FolderOpen, UserCheck, Heart, ShoppingBag, UtensilsCrossed, Shirt, Clock, CreditCard, Monitor, Calendar, Bell, Lock } from 'lucide-react';
+import { FileText, Users, ArrowLeft, LogOut, BookOpen, FolderOpen, UserCheck, Heart, ShoppingBag, UtensilsCrossed, Shirt, Clock, CreditCard, Monitor, Calendar, Bell, Lock, Settings } from 'lucide-react';
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void;
@@ -39,6 +39,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
       icon: <FolderOpen className="w-8 h-8" />,
       color: 'bg-red-600 hover:bg-red-700',
       iconBg: 'bg-red-100 text-red-600'
+    },
+    {
+      id: 'internal-management',
+      title: 'Gestión interna',
+      description: 'Configurar visualización y descarga de documentos ya subidos',
+      icon: <Settings className="w-8 h-8" />,
+      color: 'bg-slate-700 hover:bg-slate-800',
+      iconBg: 'bg-slate-100 text-slate-700'
     },
     {
       id: 'ceal-management',
