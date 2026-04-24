@@ -1,5 +1,20 @@
 import { supabase } from './supabase'
 
+function normalizeCourse(input: string): string {
+  return (input || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/°/g, 'º')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s+[a-z]$/i, '')
+    .replace(/^1\s*medio$/, 'i medio')
+    .replace(/^2\s*medio$/, 'ii medio')
+    .replace(/^3\s*medio$/, 'iii medio')
+    .replace(/^4\s*medio$/, 'iv medio')
+}
+
 export interface PlanBook {
   id: string
   year?: string
@@ -26,7 +41,6 @@ export async function fetchPlanBooks(filters: { year?: string; course?: string; 
     } else if (filters.year) {
       query = query.eq('year', filters.year)
     }
-    if (filters.course) query = query.eq('course', filters.course)
     if (filters.q) {
       const q = filters.q.trim()
       query = query.or(`title.ilike.%${q}%,author.ilike.%${q}%,editorial.ilike.%${q}%`)
@@ -46,7 +60,15 @@ export async function fetchPlanBooks(filters: { year?: string; course?: string; 
       }
     }
 
-    return deduped
+    if (!filters.course) {
+      return deduped
+    }
+
+    const selectedCourse = normalizeCourse(filters.course)
+    return deduped.filter((r) => {
+      const rowCourse = normalizeCourse(r.course || '')
+      return rowCourse === selectedCourse
+    })
   } catch (error) {
     console.error('fetchPlanBooks error', error)
     return []
