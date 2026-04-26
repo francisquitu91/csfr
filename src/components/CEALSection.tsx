@@ -180,7 +180,7 @@ const CEALSection: React.FC<CEALSectionProps> = ({ onBack }) => {
       {/* Hero Image Section */}
       <div className={`relative h-[420px] sm:h-[500px] lg:h-[560px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <img
-          src="https://i.postimg.cc/kGd8JkCC/alumnos.jpg"
+          src="https://i.postimg.cc/T3j69tw9/f077195a-972c-4f54-91df-548d0b1910a1.jpg"
           alt="Alumnos del Colegio Sagrada Familia"
           className="w-full h-full object-cover object-top"
         />
