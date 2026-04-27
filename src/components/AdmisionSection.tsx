@@ -245,7 +245,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
       icon: <FileText className="w-20 h-20" />,
       color: 'bg-green-600',
       ctaLabel: 'Ir a Colegium',
-      ctaHref: 'https://colegiosagradafamilia.postulaciones.colegium.com/loginColegio'
+      ctaHref: 'https://schoolnet.colegium.com/webapp/es_CL/login'
     },
     {
       id: 3,
@@ -286,7 +286,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
   const contactPerson: ContactPerson = {
     name: 'Jennifer Nielsen Varela',
     role: 'Encargada de Admisión',
-    email: 'admision@sagradafamilia.cl',
+    email: 'admision@csfr.cl',
     phone: '9 3242 2220',
     address: 'Colegio Sagrada Familia\nParcela 4, Los Pinos, Reñaca\nCasilla 5104 – Correo Reñaca',
     photo: 'https://i.postimg.cc/B6RMxtwm/1516855554215.jpg'

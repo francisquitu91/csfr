@@ -167,7 +167,7 @@ const RecursosDigitalesSection: React.FC<RecursosDigitalesProps> = ({ onBack }) 
 
               {/* Botón a SchoolNet */}
               <a
-                href="https://colegiosagradafamilia.postulaciones.colegium.com/loginColegio"
+                href="https://schoolnet.colegium.com/webapp/es_CL/login"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 space-x-3"
