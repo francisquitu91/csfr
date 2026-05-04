@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Trash2, Plus, X, Upload, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Plus, X, Upload, FileText, Download, Link } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { fetchLibrosEstanteria, addLibroEstanteria, updateLibroEstanteria, deleteLibroEstanteria, extractGoogleDriveFileId } from '../lib/estanteriaVirtual';
 
 interface BibliotecaManagementProps {
   onBack: () => void;
@@ -15,14 +16,23 @@ interface PlanLector {
 
 const BibliotecaManagement: React.FC<BibliotecaManagementProps> = ({ onBack }) => {
   const [planesLectores, setPlanesLectores] = useState<PlanLector[]>([]);
+  const [librosEstanteria, setLibrosEstanteria] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'planes' | 'estanteria'>('planes');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [editingPlan, setEditingPlan] = useState<PlanLector | null>(null);
+  const [editingLibro, setEditingLibro] = useState<any | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     fetchPlanesLectores();
+    fetchLibros();
   }, []);
+
+  const fetchLibros = async () => {
+    const libros = await fetchLibrosEstanteria();
+    setLibrosEstanteria(libros);
+  };
 
   const fetchPlanesLectores = async () => {
     setLoading(true);
@@ -37,6 +47,62 @@ const BibliotecaManagement: React.FC<BibliotecaManagementProps> = ({ onBack }) =
     } catch (error) {
       console.error('Error fetching planes lectores:', error);
       setMessage('Error al cargar planes lectores');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveLibro = async () => {
+    if (!editingLibro) return;
+
+    if (!editingLibro.title || !editingLibro.drive_link) {
+      setMessage('Por favor completa título y link de Drive');
+      return;
+    }
+
+    // Extract file ID from Drive link
+    const fileId = extractGoogleDriveFileId(editingLibro.drive_link);
+    if (!fileId) {
+      setMessage('Link de Google Drive inválido');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (editingLibro.id) {
+        const result = await updateLibroEstanteria(editingLibro.id, editingLibro);
+        if (result) setMessage('Libro actualizado exitosamente');
+        else setMessage('Error al actualizar libro');
+      } else {
+        const result = await addLibroEstanteria(editingLibro);
+        if (result) setMessage('Libro agregado exitosamente');
+        else setMessage('Error al agregar libro');
+      }
+      setEditingLibro(null);
+      fetchLibros();
+    } catch (error) {
+      console.error('Error saving libro:', error);
+      setMessage('Error al guardar libro');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteLibro = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar este libro?')) return;
+
+    setLoading(true);
+    try {
+      const success = await deleteLibroEstanteria(id);
+      if (success) {
+        setMessage('Libro eliminado exitosamente');
+        fetchLibros();
+      } else {
+        setMessage('Error al eliminar libro');
+      }
+    } catch (error) {
+      console.error('Error deleting libro:', error);
+      setMessage('Error al eliminar libro');
     } finally {
       setLoading(false);
     }
@@ -162,7 +228,31 @@ const BibliotecaManagement: React.FC<BibliotecaManagementProps> = ({ onBack }) =
 
           <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Biblioteca</h1>
-          <p className="text-gray-600">Administra los planes lectores (ahora la plataforma Plan Lector es la fuente principal)</p>
+          <p className="text-gray-600">Administra planes lectores y la estantería virtual de libros</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-6 flex gap-2 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('planes')}
+            className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
+              activeTab === 'planes'
+                ? 'border-amber-600 text-amber-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Planes Lectores
+          </button>
+          <button
+            onClick={() => setActiveTab('estanteria')}
+            className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
+              activeTab === 'estanteria'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Estantería Virtual
+          </button>
         </div>
 
         {message && (
@@ -174,6 +264,8 @@ const BibliotecaManagement: React.FC<BibliotecaManagementProps> = ({ onBack }) =
           </div>
         )}
 
+        {/* Planes Lectores Tab */}
+        {activeTab === 'planes' && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Planes Lectores</h2>
@@ -339,6 +431,223 @@ const BibliotecaManagement: React.FC<BibliotecaManagementProps> = ({ onBack }) =
             )}
           </div>
         </div>
+        )}
+
+        {/* Estantería Virtual Tab */}
+        {activeTab === 'estanteria' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Estantería Virtual</h2>
+            <button
+              onClick={() => setEditingLibro({
+                title: '',
+                drive_link: '',
+                cover_image_url: '',
+                author: '',
+                description: '',
+                category: '',
+                order_index: 0
+              })}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Agregar Libro</span>
+            </button>
+          </div>
+
+          {/* Formulario de Edición de Libro */}
+          {editingLibro && (
+            <div className="mb-6 p-6 bg-blue-50 rounded-lg border-2 border-blue-500">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingLibro.id ? 'Editar Libro' : 'Nuevo Libro'}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Título del Libro *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingLibro.title}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, title: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: El Quijote"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Autor
+                  </label>
+                  <input
+                    type="text"
+                    value={editingLibro.author || ''}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, author: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: Miguel de Cervantes"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Link de Google Drive * 
+                  </label>
+                  <input
+                    type="text"
+                    value={editingLibro.drive_link}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, drive_link: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://drive.google.com/file/d/FILE_ID/view"
+                  />
+                  <p className="text-xs text-gray-600 mt-1">Copia el enlace del PDF desde Google Drive</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    URL de Imagen de Portada
+                  </label>
+                  <input
+                    type="text"
+                    value={editingLibro.cover_image_url || ''}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, cover_image_url: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://..."
+                  />
+                  {editingLibro.cover_image_url && (
+                    <div className="mt-2 w-20 h-28 rounded overflow-hidden border">
+                      <img src={editingLibro.cover_image_url} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Curso / Nivel *
+                  </label>
+                  <select
+                    value={editingLibro.category || ''}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Selecciona un curso</option>
+                    <option value="Primero Básico">Primero Básico</option>
+                    <option value="Segundo Básico">Segundo Básico</option>
+                    <option value="Tercero Básico">Tercero Básico</option>
+                    <option value="Cuarto Básico">Cuarto Básico</option>
+                    <option value="Quinto Básico">Quinto Básico</option>
+                    <option value="Sexto Básico">Sexto Básico</option>
+                    <option value="Séptimo Básico">Séptimo Básico</option>
+                    <option value="Octavo Básico">Octavo Básico</option>
+                    <option value="Primero Medio">Primero Medio</option>
+                    <option value="Segundo Medio">Segundo Medio</option>
+                    <option value="Tercero Medio">Tercero Medio</option>
+                    <option value="Cuarto Medio">Cuarto Medio</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={editingLibro.description || ''}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, description: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Breve descripción del libro"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Orden de Visualización
+                  </label>
+                  <input
+                    type="number"
+                    value={editingLibro.order_index || 0}
+                    onChange={(e) => setEditingLibro({ ...editingLibro, order_index: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={handleSaveLibro}
+                    disabled={loading}
+                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    <Save className="w-5 h-5" />
+                    <span>{loading ? 'Guardando...' : 'Guardar Libro'}</span>
+                  </button>
+                  <button
+                    onClick={() => setEditingLibro(null)}
+                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de Libros */}
+          <div className="space-y-4">
+            {librosEstanteria.length > 0 ? (
+              librosEstanteria.map((libro) => (
+                <div
+                  key={libro.id}
+                  className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow flex gap-4"
+                >
+                  {libro.cover_image_url && (
+                    <div className="flex-shrink-0 w-16 h-24 rounded overflow-hidden border bg-gray-100">
+                      <img src={libro.cover_image_url} alt={libro.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">{libro.title}</h3>
+                        {libro.author && <p className="text-sm text-gray-600">Por {libro.author}</p>}
+                        {libro.category && (
+                          <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium mt-1">
+                            {libro.category}
+                          </span>
+                        )}
+                        {libro.description && (
+                          <p className="text-sm text-gray-600 mt-2">{libro.description}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => setEditingLibro(libro)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <FileText className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteLibro(libro.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Link className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p>No hay libros en la estantería virtual</p>
+                <p className="text-sm mt-2">Haz clic en "Agregar Libro" para agregar uno</p>
+              </div>
+            )}
+          </div>
+        </div>
+        )}
       </div>
     </div>
   );

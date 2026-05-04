@@ -52,6 +52,7 @@ import Footer from './components/Footer';
 import PlanLectorSection from './components/PlanLectorSection';
 import PlanLectorManagement from './components/PlanLectorManagement';
 import PEIViewerSection from './components/PEIViewerSection';
+import EstanteriaVirtualSection from './components/EstanteriaVirtualSection';
 
 const backgroundImages = [
   'https://i.postimg.cc/kgTkxtpM/pastoral.jpg',
@@ -279,6 +280,10 @@ function App() {
 
   if (currentPage === 'plan-lector') {
     return <PlanLectorSection onBack={handleBackToBiblioteca} />;
+  }
+
+  if (currentPage === 'estanteria-virtual') {
+    return <EstanteriaVirtualSection onBack={handleBackToBiblioteca} />;
   }
 
   if (currentPage === 'plan-lector-management') {

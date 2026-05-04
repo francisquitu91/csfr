@@ -151,6 +151,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
       icon: <Bell className="w-8 h-8" />,
       color: 'bg-red-600 hover:bg-red-700',
       iconBg: 'bg-red-100 text-red-600'
+    },
+    {
+      id: 'biblioteca-management',
+      title: 'Gestión de Biblioteca',
+      description: 'Planes lectores y estantería virtual de libros',
+      icon: <BookOpen className="w-8 h-8" />,
+      color: 'bg-amber-600 hover:bg-amber-700',
+      iconBg: 'bg-amber-100 text-amber-600'
     }
   ];
 

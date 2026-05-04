@@ -15,6 +15,12 @@ const BibliotecaSection: React.FC<BibliotecaSectionProps> = ({ onBack }) => {
     }
   };
 
+  const openEstanteriaVirtual = () => {
+    if ((window as any).navigateTo) {
+      (window as any).navigateTo('estanteria-virtual');
+    }
+  };
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -122,7 +128,7 @@ const BibliotecaSection: React.FC<BibliotecaSectionProps> = ({ onBack }) => {
             <div className="w-48 h-1 bg-[#8B5E3C] mx-auto rounded"></div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Buscador de Libros */}
             <a
               href="https://colegiosagradafamilia.colegium.com/mt"
@@ -148,6 +154,30 @@ const BibliotecaSection: React.FC<BibliotecaSectionProps> = ({ onBack }) => {
                 </div>
               </div>
             </a>
+
+            {/* Estantería Virtual */}
+            <button
+              onClick={openEstanteriaVirtual}
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 text-left cursor-pointer"
+            >
+              <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-8 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <BookOpen className="w-12 h-12" />
+                  <ExternalLink className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Estantería Virtual</h3>
+                <p className="text-indigo-100">Colección de Libros Digital</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-700 mb-4">
+                  Accede a nuestra colección de libros disponibles en línea. Lectura directa sin descargas.
+                </p>
+                <div className="flex items-center text-indigo-600 font-semibold group-hover:text-indigo-700">
+                  <span>Explorar estantería</span>
+                  <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </button>
 
             {/* Recursos Digitales */}
             <a

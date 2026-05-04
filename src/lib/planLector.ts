@@ -13,6 +13,10 @@ function normalizeCourse(input: string): string {
     .replace(/^2\s*medio$/, 'ii medio')
     .replace(/^3\s*medio$/, 'iii medio')
     .replace(/^4\s*medio$/, 'iv medio')
+    .replace(/^i\s*medio$/, 'i medio')
+    .replace(/^ii\s*medio$/, 'ii medio')
+    .replace(/^iii\s*medio$/, 'iii medio')
+    .replace(/^iv\s*medio$/, 'iv medio')
 }
 
 export interface PlanBook {
@@ -38,6 +42,9 @@ export async function fetchPlanBooks(filters: { year?: string; course?: string; 
     if (filters.year === '2025') {
       // 2025 must preserve the original legacy content, which may have no year assigned.
       query = query.or('year.is.null,year.eq.2025')
+    } else if (filters.year === '2026') {
+      // 2026 also includes content without year assigned
+      query = query.or('year.is.null,year.eq.2026')
     } else if (filters.year) {
       query = query.eq('year', filters.year)
     }
