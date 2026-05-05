@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { ArrowLeft, Save, X, UtensilsCrossed, CalendarDays, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -70,10 +70,54 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Auto-save effect for settings changes
+  const autoSaveSettings = useCallback(async (settingsToSave: MenuSettings) => {
+    try {
+      const payload = {
+        id: 1,
+        title: settingsToSave.title,
+        display_month: settingsToSave.display_month,
+        display_year: settingsToSave.display_year,
+        concessionaria_nombre: settingsToSave.concessionaria_nombre || null,
+        concessionaria_telefono: settingsToSave.concessionaria_telefono || null,
+        concessionaria_email: settingsToSave.concessionaria_email || null,
+        nutricionista_nombre: settingsToSave.nutricionista_nombre || null,
+        nutricionista_telefono: settingsToSave.nutricionista_telefono || null
+      };
+
+      const { error } = await supabase
+        .from('casino_menu_settings')
+        .upsert(payload, { onConflict: 'id' });
+
+      if (error) {
+        console.error('Auto-save error:', error);
+      }
+    } catch (error) {
+      console.error('Error in auto-save:', error);
+    }
+  }, []);
+
+  const handleSettingsChange = useCallback((newSettings: MenuSettings) => {
+    setSettings(newSettings);
+    
+    // Clear previous timeout
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+
+    // Set new timeout for auto-save after 1.5 seconds
+    const timeout = setTimeout(() => {
+      autoSaveSettings(newSettings);
+    }, 1500);
+
+    setAutoSaveTimeout(timeout);
+  }, [autoSaveTimeout, autoSaveSettings]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -155,21 +199,32 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
     setSaving(true);
     try {
       const payload = {
-        ...settings,
-        id: 1
+        id: 1,
+        title: settings.title,
+        display_month: settings.display_month,
+        display_year: settings.display_year,
+        concessionaria_nombre: settings.concessionaria_nombre || null,
+        concessionaria_telefono: settings.concessionaria_telefono || null,
+        concessionaria_email: settings.concessionaria_email || null,
+        nutricionista_nombre: settings.nutricionista_nombre || null,
+        nutricionista_telefono: settings.nutricionista_telefono || null
       };
 
       const { error } = await supabase
         .from('casino_menu_settings')
         .upsert(payload, { onConflict: 'id' });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       await loadMonthItems(settings.display_month, settings.display_year);
-      setMessage('Configuración del menú guardada');
+      setMessage('✓ Configuración del menú guardada correctamente');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
-      setMessage('Error al guardar la configuración');
+      setMessage('❌ Error al guardar la configuración. Intenta de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -191,13 +246,17 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
         .from('casino_menu_items')
         .upsert(payload, { onConflict: 'menu_year,menu_month,menu_date' });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       await loadMonthItems(settings.display_month, settings.display_year);
-      setMessage('Calendario de menú guardado');
+      setMessage('✓ Calendario de menú guardado correctamente');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving menu items:', error);
-      setMessage('Error al guardar los días del menú');
+      setMessage('❌ Error al guardar los días del menú. Intenta de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -214,10 +273,11 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
       if (error) throw error;
 
       setMenuItems((prev) => prev.filter((i) => i.id !== item.id));
-      setMessage('Día eliminado');
+      setMessage('✓ Día eliminado correctamente');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error deleting item:', error);
-      setMessage('Error al eliminar día');
+      setMessage('❌ Error al eliminar el día. Intenta de nuevo.');
     }
   };
 
@@ -258,7 +318,11 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
         </div>
 
         {message && (
-          <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg flex items-center justify-between">
+          <div className={`mb-6 p-4 border rounded-lg flex items-center justify-between ${
+            message.includes('❌') 
+              ? 'bg-red-100 border-red-400 text-red-700' 
+              : 'bg-green-100 border-green-400 text-green-700'
+          }`}>
             <span>{message}</span>
             <button onClick={() => setMessage('')}>
               <X className="w-5 h-5" />
@@ -284,7 +348,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="text"
                     value={settings.title}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
@@ -294,7 +358,8 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                     value={settings.display_month}
                     onChange={async (e) => {
                       const month = Number(e.target.value);
-                      setSettings((prev) => ({ ...prev, display_month: month }));
+                      const newSettings = { ...settings, display_month: month };
+                      handleSettingsChange(newSettings);
                       await loadMonthItems(month, settings.display_year);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
@@ -311,7 +376,8 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                     value={settings.display_year}
                     onChange={async (e) => {
                       const year = Number(e.target.value);
-                      setSettings((prev) => ({ ...prev, display_year: year }));
+                      const newSettings = { ...settings, display_year: year };
+                      handleSettingsChange(newSettings);
                       if (!Number.isNaN(year) && year > 1990) {
                         await loadMonthItems(settings.display_month, year);
                       }
@@ -336,7 +402,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="text"
                     value={settings.concessionaria_nombre || ''}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_nombre: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, concessionaria_nombre: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -345,7 +411,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="text"
                     value={settings.concessionaria_telefono || ''}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_telefono: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, concessionaria_telefono: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -354,7 +420,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="email"
                     value={settings.concessionaria_email || ''}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, concessionaria_email: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, concessionaria_email: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -363,7 +429,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="text"
                     value={settings.nutricionista_nombre || ''}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, nutricionista_nombre: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, nutricionista_nombre: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -372,7 +438,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   <input
                     type="text"
                     value={settings.nutricionista_telefono || ''}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, nutricionista_telefono: e.target.value }))}
+                    onChange={(e) => handleSettingsChange({ ...settings, nutricionista_telefono: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>

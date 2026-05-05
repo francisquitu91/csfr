@@ -57,6 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
         'UNIFORMES ESCOLARES',
         'ÚTILES ESCOLARES',
         'FECHAS IMPORTANTES',
+        'INTRANET'
       ]
     }
   ];
@@ -199,6 +200,11 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setIsMenuOpen(false);
     } else if (itemName === 'GESTIÓN PLAN LECTOR') {
       onPageChange('plan-lector-management');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
+    } else if (itemName === 'INTRANET') {
+      window.open('https://intranetcsfr.onrender.com/', '_blank');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
