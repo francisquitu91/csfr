@@ -10,6 +10,7 @@ interface HorarioCurso {
   id: number;
   nivel: string;
   curso: string;
+  seccion?: string;
   order_index: number;
 }
 
@@ -172,7 +173,7 @@ const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
 
       if (error) throw error;
 
-      setMessage(`Horario guardado para ${cursoActual?.curso || 'el curso seleccionado'}`);
+      setMessage(`Horario guardado para ${cursoActual?.curso || 'el curso seleccionado'} ${cursoActual?.seccion || 'A'}`);
       await fetchData();
     } catch (error) {
       console.error('Error saving course timetable:', error);
@@ -235,14 +236,14 @@ const HorariosManagement: React.FC<HorariosManagementProps> = ({ onBack }) => {
                 >
                   {cursos.map((curso) => (
                     <option key={curso.id} value={curso.id}>
-                      {curso.curso} - {curso.nivel}
+                      {curso.curso} {curso.seccion || 'A'} - {curso.nivel}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="text-sm text-gray-600 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
-                Editando: <span className="font-bold text-green-800">{cursoActual?.curso || '-'}</span>
+                Editando: <span className="font-bold text-green-800">{cursoActual?.curso || '-'} {cursoActual?.seccion || 'A'}</span>
               </div>
             </div>
 

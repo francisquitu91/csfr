@@ -401,7 +401,7 @@ function App() {
               </h2>
               
               <p className="text-gray-600 text-base leading-relaxed">
-                El Colegio Sagrada Familia inició sus actividades en 1992, junto al Santuario de Schoenstatt, 
+                El Colegio Sagrada Familia inició sus actividades en 1999, junto al Santuario de Schoenstatt, 
                 ubicado en Reñaca, Viña del Mar. Nació porque el cambio de siglo mostró la necesidad de fomentar 
                 valores familiares y sociales y ante esta urgencia, un grupo de laicos y sacerdotes de este 
                 Movimiento de Iglesia se vieron motivados a crear una institución, con estilo familiar, orientada 

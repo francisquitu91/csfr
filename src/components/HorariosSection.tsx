@@ -14,6 +14,7 @@ interface HorarioCurso {
   id: number;
   nivel: string;
   curso: string;
+  seccion?: string;
   order_index: number;
 }
 
@@ -155,13 +156,13 @@ const HorariosSection: React.FC<HorariosSectionProps> = ({ onBack }) => {
                 >
                   {cursos.map((curso) => (
                     <option key={curso.id} value={curso.id}>
-                      {curso.curso} - {curso.nivel}
+                      {curso.curso} {curso.seccion || 'A'} - {curso.nivel}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="text-sm text-gray-600 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
-                Mostrando horario de: <span className="font-bold text-green-800">{cursoActivo?.curso || '-'}</span>
+                Mostrando horario de: <span className="font-bold text-green-800">{cursoActivo?.curso || '-'} {cursoActivo?.seccion || 'A'}</span>
               </div>
             </div>
 

@@ -44,7 +44,8 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
         'ANUARIOS',
         'RECURSOS DIGITALES',
         'FUNDACIÓN PENTÉCOSTES'
-      ]
+      ],
+      hasSubDropdown: true
     },
     { name: 'ADMISIÓN', href: '#' },
     {
@@ -56,8 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
         'HORARIOS',
         'UNIFORMES ESCOLARES',
         'ÚTILES ESCOLARES',
-        'FECHAS IMPORTANTES',
-        'INTRANET'
+        'FECHAS IMPORTANTES'
       ]
     }
   ];
@@ -98,10 +98,8 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
     } else if (itemName === 'EDUCADORES') {
-      onPageChange('educadores');
-      setActiveDropdown(null);
-      setActiveSubDropdown(null);
-      setIsMenuOpen(false);
+      // This item now has sub-dropdown options, toggle them
+      setActiveSubDropdown(activeSubDropdown === 'EDUCADORES' ? null : 'EDUCADORES');
     } else if (itemName === 'FAMILIA') {
       onPageChange('familia');
       setActiveDropdown(null);
@@ -203,6 +201,16 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
+    } else if (itemName === 'EXTRACURRICULARES') {
+      window.open('https://extracurriculares.colegium.com/', '_blank');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
+    } else if (itemName === 'SCHOOLTRACK') {
+      window.open('https://colegiosagradafamilia.colegium.com/stwa/login.shtml', '_blank');
+      setActiveDropdown(null);
+      setActiveSubDropdown(null);
+      setIsMenuOpen(false);
     } else if (itemName === 'INTRANET') {
       window.open('https://intranetcsfr.onrender.com/', '_blank');
       setActiveDropdown(null);
@@ -259,13 +267,44 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                   >
                     <div className="py-2">
                       {item.dropdown.map((subItem) => (
-                        <div key={subItem} className="relative">
+                        <div 
+                          key={subItem} 
+                          className="relative"
+                          onMouseEnter={() => subItem === 'EDUCADORES' && setActiveSubDropdown('EDUCADORES')}
+                          onMouseLeave={() => subItem === 'EDUCADORES' && setActiveSubDropdown(null)}
+                        >
                           <button
                             onClick={() => handleMenuClick(subItem)}
                             className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200 border-b border-gray-200 last:border-b-0"
                           >
-                            {subItem}
+                            <span>{subItem}</span>
+                            {subItem === 'EDUCADORES' && (
+                              <ChevronDown className={`w-4 h-4 transition-transform ${activeSubDropdown === 'EDUCADORES' ? 'rotate-180' : ''}`} />
+                            )}
                           </button>
+                          {/* Educadores sub-options */}
+                          {subItem === 'EDUCADORES' && activeSubDropdown === 'EDUCADORES' && (
+                            <div className="pl-0 bg-gray-50 border-t border-gray-200">
+                              <button
+                                onClick={() => handleMenuClick('EXTRACURRICULARES')}
+                                className="block w-full text-left px-6 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 transition-colors duration-200"
+                              >
+                                Extracurriculares
+                              </button>
+                              <button
+                                onClick={() => handleMenuClick('SCHOOLTRACK')}
+                                className="block w-full text-left px-6 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 transition-colors duration-200"
+                              >
+                                SchoolTrack
+                              </button>
+                              <button
+                                onClick={() => handleMenuClick('INTRANET')}
+                                className="block w-full text-left px-6 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 transition-colors duration-200"
+                              >
+                                Intranet
+                              </button>
+                            </div>
+                          )}
                           {/* Plan Lector mobile options */}
                           {subItem === 'DOCUMENTOS INSTITUCIONALES' && activeSubDropdown === 'DOCUMENTOS INSTITUCIONALES' && (
                             <div className="pl-4 space-y-1">
@@ -352,11 +391,42 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                     {item.dropdown.map((subItem) => (
                       <div key={subItem}>
                         <button
-                          onClick={() => handleMenuClick(subItem)}
+                          onClick={() => subItem === 'EDUCADORES' ? setActiveSubDropdown(activeSubDropdown === 'EDUCADORES' ? null : 'EDUCADORES') : handleMenuClick(subItem)}
                           className="flex items-center justify-between w-full text-left px-3 py-2 text-sm text-gray-200 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
                         >
-                          {subItem}
+                          <span>{subItem}</span>
+                          {subItem === 'EDUCADORES' && (
+                            <ChevronDown 
+                              className={`h-4 w-4 transition-transform duration-200 ${
+                                activeSubDropdown === 'EDUCADORES' ? 'rotate-180' : ''
+                              }`} 
+                            />
+                          )}
                         </button>
+                        
+                        {/* Mobile Educadores sub-options */}
+                        {subItem === 'EDUCADORES' && activeSubDropdown === 'EDUCADORES' && (
+                          <div className="pl-4 space-y-1 mt-2">
+                            <button
+                              onClick={() => handleMenuClick('EXTRACURRICULARES')}
+                              className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
+                            >
+                              Extracurriculares
+                            </button>
+                            <button
+                              onClick={() => handleMenuClick('SCHOOLTRACK')}
+                              className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
+                            >
+                              SchoolTrack
+                            </button>
+                            <button
+                              onClick={() => handleMenuClick('INTRANET')}
+                              className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
+                            >
+                              Intranet
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

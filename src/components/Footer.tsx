@@ -57,7 +57,7 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
           {/* Additional Info */}
           <div className="text-center text-gray-400 text-xs">
             <p>Parcela 4, Los Pinos, Reñaca - Casilla 5104 – Correo Reñaca</p>
-            <p className="mt-1">Formando líderes desde 1992</p>
+            <p className="mt-1">Formando líderes desde 1999</p>
           </div>
         </div>
 
