@@ -102,8 +102,8 @@ const MapSection: React.FC = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-1">Horario de Atención</h4>
                     <div className="text-gray-600 space-y-1">
-                      <p>Lunes a Viernes: 8:00 - 17:00</p>
-                      <p>Domingos: Cerrado</p>
+                      <p>Lunes a Jueves: 08:00 - 16:15</p>
+                      <p>Viernes: 08:00 - 14:00</p>
                     </div>
                   </div>
                 </div>
