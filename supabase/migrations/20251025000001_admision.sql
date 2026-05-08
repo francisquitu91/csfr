@@ -101,8 +101,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO admision_contact (name, role, email, phone, address, photo_url)
 VALUES
   ('Jennifer Martínez', 'Encargada de Admisión', 'admision@csfr.cl', '(+569) 9884 9756', 'Colegio Sagrada Familia
-Parcela 4, Los Pinos, Reñaca
-Casilla 5104 – Correo Reñaca', 'https://i.postimg.cc/B6RMxtwm/1516855554215.jpg')
+Parcela 4, Los Pinos, Reñaca', 'https://i.postimg.cc/B6RMxtwm/1516855554215.jpg')
 ON CONFLICT DO NOTHING;
 
 -- Create indexes for better performance

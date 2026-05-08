@@ -288,7 +288,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
     role: 'Encargada de Admisión',
     email: 'admision@csfr.cl',
     phone: '9 3242 2220',
-    address: 'Colegio Sagrada Familia\nParcela 4, Los Pinos, Reñaca\nCasilla 5104 – Correo Reñaca',
+    address: 'Colegio Sagrada Familia\nParcela 4, Los Pinos, Reñaca',
     photo: 'https://i.postimg.cc/B6RMxtwm/1516855554215.jpg'
   };
 

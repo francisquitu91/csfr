@@ -16,20 +16,11 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
         <div className="flex flex-col items-center space-y-8">
           {/* Logos Section */}
           <div className="flex items-center justify-center space-x-8 flex-wrap">
-            {/* Sagrada Familia Logo */}
-            <div className="flex items-center">
-              <img 
-                src="https://colegiosagradafamilia.cl/www/wp-content/uploads/2022/04/cropped-logo-hd-1.png"
-                alt="Colegio Sagrada Familia Logo"
-                className="h-16 w-auto object-contain"
-              />
-            </div>
-            
-            {/* Additional Logo */}
+            {/* New Logo */}
             <div className="flex items-center">
               <img 
                 src="https://i.postimg.cc/QdNh7rhG/1.png"
-                alt="Logo Adicional"
+                alt="Logo Sagrada Familia"
                 className="h-16 w-auto object-contain"
               />
             </div>
@@ -56,8 +47,7 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
 
           {/* Additional Info */}
           <div className="text-center text-gray-400 text-xs">
-            <p>Parcela 4, Los Pinos, Reñaca - Casilla 5104 – Correo Reñaca</p>
-            <p className="mt-1">Formando líderes desde 1999</p>
+            <p>Formando líderes desde 1999</p>
           </div>
         </div>
 
