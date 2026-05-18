@@ -447,7 +447,7 @@ const Historia: React.FC<HistoriaProps> = ({ onBack }) => {
               <h3 className="text-2xl font-bold text-red-900 mb-6">Equipo Directivo</h3>
               <div className="bg-red-50 p-6 rounded-lg mb-6">
                 <p className="text-gray-700 leading-relaxed">
-                  La Vicerrectoría de Formación lidera el desarrollo del sello formativo del colegio, promoviendo en toda la comunidad educativa los valores y principios que inspiran nuestro Proyecto Educativo. En conjunto con los equipos de Pastoral, Convivencia Escolar y Áreas de apoyo, acompaña a los estudiantes en su crecimiento personal, social y espiritual, favoreciendo la construcción de una identidad sólida y comprometida. Nuestro objetivo es formar personas íntegras, capaces de vivir con sentido, desarrollar sus talentos y aportar positivamente a la sociedad desde su ideal personal.
+                  El Directorio del colegio está compuesto por representantes de los distintos estamentos de la comunidad educativa, velando por el cumplimiento de nuestro Proyecto Educativo Institucional y promoviendo una gestión coherente con los valores y principios que inspiran nuestra misión. Está integrado por la Rectora, el Vicerrector Académico, el Vicerrector de Formación, el Gerente de Administración y Finanzas, el Coordinador General de Convivencia Educativa y el encargado de Pastoral, quienes trabajan de manera colaborativa en la toma de decisiones estratégicas y en el fortalecimiento de una formación integral para todos nuestros estudiantes.
                 </p>
               </div>
               
