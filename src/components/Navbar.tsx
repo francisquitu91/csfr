@@ -216,7 +216,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
       setActiveDropdown(null);
       setActiveSubDropdown(null);
       setIsMenuOpen(false);
-    } else if (itemName === 'PAGOS BUK') {
+    } else if (itemName === 'REMUNERACIONES BUK') {
       window.open('https://colegiosagradafamiliarenaca.buk.cl/users/sign_in', '_blank');
       setActiveDropdown(null);
       setActiveSubDropdown(null);
@@ -309,10 +309,10 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                                 Intranet
                               </button>
                               <button
-                                onClick={() => handleMenuClick('PAGOS BUK')}
+                                onClick={() => handleMenuClick('REMUNERACIONES BUK')}
                                 className="block w-full text-left px-6 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 transition-colors duration-200"
                               >
-                                Pagos BUK
+                                Remuneraciones BUK
                               </button>
                             </div>
                           )}
@@ -437,10 +437,10 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
                               Intranet
                             </button>
                             <button
-                              onClick={() => handleMenuClick('PAGOS BUK')}
+                              onClick={() => handleMenuClick('REMUNERACIONES BUK')}
                               className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200 rounded"
                             >
-                              Pagos BUK
+                              Remuneraciones BUK
                             </button>
                           </div>
                         )}
