@@ -120,3 +120,15 @@ export interface InstitutionalDocument {
   use_visualization_link?: boolean;
 }
 
+export interface JobPosting {
+  id: number;
+  title: string;
+  description?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  order_index: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+

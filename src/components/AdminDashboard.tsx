@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Users, ArrowLeft, LogOut, BookOpen, FolderOpen, UserCheck, Heart, ShoppingBag, UtensilsCrossed, Shirt, Clock, CreditCard, Monitor, Calendar, Bell, Lock, Settings } from 'lucide-react';
+import { FileText, Users, ArrowLeft, LogOut, BookOpen, FolderOpen, UserCheck, Heart, ShoppingBag, UtensilsCrossed, Shirt, Clock, CreditCard, Monitor, Calendar, Bell, Lock, Settings, Briefcase } from 'lucide-react';
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void;
@@ -159,6 +159,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
       icon: <BookOpen className="w-8 h-8" />,
       color: 'bg-amber-600 hover:bg-amber-700',
       iconBg: 'bg-amber-100 text-amber-600'
+    },
+    {
+      id: 'trabaja-con-nosotros-management',
+      title: 'Gestión de Ofertas Laborales',
+      description: 'Administrar ofertas de trabajo con folletos',
+      icon: <Briefcase className="w-8 h-8" />,
+      color: 'bg-green-600 hover:bg-green-700',
+      iconBg: 'bg-green-100 text-green-600'
     }
   ];
 

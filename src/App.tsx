@@ -31,6 +31,7 @@ import AdmisionSection from './components/AdmisionSection';
 import AdmisionManagement from './components/AdmisionManagement';
 import BibliotecaSection from './components/BibliotecaSection';
 import BibliotecaManagement from './components/BibliotecaManagement';
+import TrabajaConNosotrosManagement from './components/TrabajaConNosotrosManagement';
 import UtilesEscolaresSection from './components/UtilesEscolaresSection';
 import UtilesEscolaresManagement from './components/UtilesEscolaresManagement';
 import CasinoModal from './components/CasinoModal';
@@ -223,6 +224,10 @@ function App() {
 
   if (currentPage === 'biblioteca-management') {
     return <BibliotecaManagement onBack={handleBackToAdmin} />;
+  }
+
+  if (currentPage === 'trabaja-con-nosotros-management') {
+    return <TrabajaConNosotrosManagement onBack={handleBackToAdmin} />;
   }
 
   if (currentPage === 'utiles-escolares-management') {
