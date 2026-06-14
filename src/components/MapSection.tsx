@@ -38,8 +38,7 @@ const MapSection: React.FC = () => {
                     <h4 className="font-semibold text-gray-900 mb-1">Dirección</h4>
                     <p className="text-gray-600">
                       Colegio Sagrada Familia<br />
-                      Parcela 4, Los Pinos, Reñaca<br />
-                      Casilla 5104 – Correo Reñaca
+                      Parcela 4, Los Pinos, Reñaca
                     </p>
                   </div>
                 </div>
