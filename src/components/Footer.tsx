@@ -19,9 +19,9 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
             {/* New Logo */}
             <div className="flex items-center">
               <img 
-                src="https://i.postimg.cc/QdNh7rhG/1.png"
+                src="https://i.postimg.cc/dVGxJTjr/logocsfr.png"
                 alt="Logo Sagrada Familia"
-                className="h-16 w-auto object-contain"
+                className="h-64 w-auto object-contain"
               />
             </div>
           </div>

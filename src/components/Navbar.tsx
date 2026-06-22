@@ -235,7 +235,7 @@ const Navbar: React.FC<NavbarProps> = ({ onPageChange }) => {
           {/* Logo */}
           <div className="flex items-center flex-shrink-0 ml-8">
             <img
-              src="https://i.postimg.cc/FN3R296R/1.png"
+              src="https://i.postimg.cc/dVGxJTjr/logocsfr.png"
               alt="Colegio Sagrada Familia Logo"
               className="h-32 w-auto object-contain"
             />
