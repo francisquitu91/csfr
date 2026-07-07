@@ -15,15 +15,13 @@ const Footer: React.FC<FooterProps> = ({ onPageChange }) => {
         {/* Main Footer Content */}
         <div className="flex flex-col items-center space-y-8">
           {/* Logos Section */}
-          <div className="flex items-center justify-center space-x-8 flex-wrap">
-            {/* New Logo */}
-            <div className="flex items-center">
-              <img 
-                src="https://i.postimg.cc/dVGxJTjr/logocsfr.png"
-                alt="Logo Sagrada Familia"
-                className="h-64 w-auto object-contain"
-              />
-            </div>
+          <div className="w-full flex items-center justify-center px-2 sm:px-4">
+            <img
+              src="https://i.postimg.cc/13MLhzsG/fotologoscsfr.jpg"
+              alt="Logos Colegio Sagrada Familia"
+              className="w-full max-w-5xl h-auto object-contain mix-blend-multiply"
+              loading="lazy"
+            />
           </div>
 
           {/* Botón Trabaja con Nosotros */}

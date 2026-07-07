@@ -235,15 +235,13 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {access && (
-                                <button
-                                  onClick={() => setPreviewDocument(doc)}
-                                  className="flex items-center space-x-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors duration-300 transform hover:scale-105"
-                                >
-                                  <FileText className="w-4 h-4" />
-                                  <span>Visualizar</span>
-                                </button>
-                              )}
+                              <button
+                                onClick={() => setPreviewDocument(doc)}
+                                className="flex items-center space-x-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors duration-300 transform hover:scale-105"
+                              >
+                                <FileText className="w-4 h-4" />
+                                <span>Visualizar</span>
+                              </button>
 
                               <button
                                 onClick={() => handleDownload(access?.downloadUrl || doc.file_url, doc.file_name)}
@@ -268,8 +266,9 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
 
       {previewDocument && (() => {
         const access = resolveDocumentAccess(previewDocument);
+        const previewUrl = access?.visualizationUrl || previewDocument.file_url;
 
-        if (!access) return null;
+        if (!previewUrl) return null;
 
         return (
           <div className="fixed inset-0 z-50 bg-black/80">
@@ -286,7 +285,7 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
 
             <iframe
               title={previewDocument.title}
-              src={access.visualizationUrl}
+              src={previewUrl}
               className="w-full h-full pt-16 bg-black"
               allow="autoplay"
             />
