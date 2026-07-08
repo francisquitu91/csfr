@@ -159,6 +159,17 @@ const MapSection: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="mt-10 flex justify-center">
+          <div className="w-full max-w-5xl px-2 sm:px-4">
+            <img
+              src="https://i.postimg.cc/13MLhzsG/fotologoscsfr.jpg"
+              alt="Logos Colegio Sagrada Familia"
+              className="w-full h-auto object-contain"
+              loading="lazy"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
