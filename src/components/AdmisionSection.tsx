@@ -245,7 +245,7 @@ const AdmisionSection: React.FC<AdmisionSectionProps> = ({ onBack }) => {
       icon: <FileText className="w-20 h-20" />,
       color: 'bg-green-600',
       ctaLabel: 'Ir a Colegium',
-      ctaHref: 'https://schoolnet.colegium.com/webapp/es_CL/login'
+      ctaHref: 'https://colegiosagradafamilia.postulaciones.colegium.com/loginColegio'
     },
     {
       id: 3,
