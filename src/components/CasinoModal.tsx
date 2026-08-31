@@ -33,7 +33,7 @@ const monthNames = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 const formatDateKey = (date: Date) => {
   const y = date.getFullYear();
@@ -69,9 +69,9 @@ const CasinoModal: React.FC<CasinoModalProps> = ({ isOpen, onClose }) => {
         .from('casino_menu_settings')
         .select('*')
         .eq('id', 1)
-        .single();
+        .maybeSingle();
 
-      if (settingsRes.error && settingsRes.error.code !== 'PGRST116') throw settingsRes.error;
+      if (settingsRes.error) throw settingsRes.error;
 
       const resolvedSettings = settingsRes.data || {
         id: 1,
@@ -109,26 +109,30 @@ const CasinoModal: React.FC<CasinoModalProps> = ({ isOpen, onClose }) => {
 
     const first = new Date(settings.display_year, settings.display_month - 1, 1);
     const last = new Date(settings.display_year, settings.display_month, 0);
+    const firstVisible = getMondayOfWeek(first);
+    const finalDay = new Date(last.getFullYear(), last.getMonth(), last.getDate(), 23, 59, 59, 999);
 
-    const weeksMap = new Map<string, Array<Date | null>>();
+    const weeks: Array<Array<Date | null>> = [];
+    const cursor = new Date(firstVisible);
 
-    for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
-      const day = d.getDay();
-      if (day === 0 || day === 6) continue;
+    while (cursor <= finalDay || weeks.length === 0) {
+      const week: Array<Date | null> = [];
 
-      const monday = getMondayOfWeek(d);
-      const weekKey = formatDateKey(monday);
-      if (!weeksMap.has(weekKey)) {
-        weeksMap.set(weekKey, [null, null, null, null, null]);
+      for (let i = 0; i < 7; i += 1) {
+        const day = new Date(cursor);
+        const isCurrentMonth = day.getMonth() === first.getMonth();
+        week.push(isCurrentMonth ? day : null);
+        cursor.setDate(cursor.getDate() + 1);
       }
 
-      const index = day - 1;
-      weeksMap.get(weekKey)![index] = new Date(d);
+      weeks.push(week);
+
+      if (cursor > finalDay && weeks.length > 0) {
+        break;
+      }
     }
 
-    return Array.from(weeksMap.entries())
-      .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-      .map((entry) => entry[1]);
+    return weeks;
   }, [settings]);
 
   const menuByDate = useMemo(() => {
@@ -165,15 +169,19 @@ const CasinoModal: React.FC<CasinoModalProps> = ({ isOpen, onClose }) => {
             ) : settings ? (
               <div className="bg-white rounded-2xl border border-orange-100 overflow-hidden shadow-lg">
                 <div className="p-6 bg-gradient-to-r from-blue-900 to-indigo-900 text-white">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <CalendarDays className="w-8 h-8" />
-                    <h3 className="text-3xl font-bold text-center">{settings.title || `Menú ${monthNames[settings.display_month - 1]} ${settings.display_year}`}</h3>
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <p className="text-xs uppercase tracking-[0.2em] text-blue-100/90 mb-2">Mes visible</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <CalendarDays className="w-8 h-8" />
+                      <h3 className="text-3xl font-bold">{monthNames[settings.display_month - 1]} {settings.display_year}</h3>
+                    </div>
+                    <h4 className="text-xl font-semibold text-white/95">{settings.title || `Menú ${monthNames[settings.display_month - 1]} ${settings.display_year}`}</h4>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
                   <div className="min-w-[980px]">
-                    <div className="grid grid-cols-5 bg-blue-50 border-b border-blue-200">
+                    <div className="grid grid-cols-7 bg-blue-50 border-b border-blue-200">
                       {days.map((day) => (
                         <div key={day} className="py-3 px-2 text-center font-bold text-blue-800 border-r border-blue-200 last:border-r-0">
                           {day}
@@ -182,7 +190,7 @@ const CasinoModal: React.FC<CasinoModalProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {calendarWeeks.map((week, weekIndex) => (
-                      <div key={weekIndex} className="grid grid-cols-5 border-b border-blue-100 last:border-b-0">
+                      <div key={weekIndex} className="grid grid-cols-7 border-b border-blue-100 last:border-b-0">
                         {week.map((date, dayIdx) => {
                           if (!date) {
                             return <div key={`${weekIndex}-${dayIdx}`} className="min-h-[180px] border-r border-blue-100 last:border-r-0 bg-slate-50"></div>;
@@ -190,11 +198,12 @@ const CasinoModal: React.FC<CasinoModalProps> = ({ isOpen, onClose }) => {
 
                           const dateKey = formatDateKey(date);
                           const item = menuByDate.get(dateKey);
+                          const isCurrentMonth = date.getMonth() === settings.display_month - 1;
 
                           return (
-                            <div key={dateKey} className="min-h-[180px] border-r border-blue-100 last:border-r-0 p-3 bg-white">
-                              <p className="font-bold text-blue-800 mb-2">{days[dayIdx]} {`${date.getDate()}`.padStart(2, '0')}</p>
-                              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                            <div key={dateKey} className={`min-h-[180px] border-r border-blue-100 last:border-r-0 p-3 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50 text-slate-400'}`}>
+                              <p className="font-bold mb-2 text-blue-800 text-lg">{`${date.getDate()}`.padStart(2, '0')}</p>
+                              <div className="text-sm leading-relaxed whitespace-pre-line">
                                 {item?.menu_text || ''}
                               </div>
                               {item?.price != null && (

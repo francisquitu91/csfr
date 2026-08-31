@@ -39,33 +39,48 @@ const formatDateKey = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
-const generateWeekdays = (month: number, year: number) => {
-  const start = new Date(year, month - 1, 1);
-  const end = new Date(year, month, 0);
-  const result: string[] = [];
+const getDefaultSettings = (): MenuSettings => ({
+  id: 1,
+  title: `Menú ${monthNames[new Date().getMonth()]} ${new Date().getFullYear()}`,
+  display_month: new Date().getMonth() + 1,
+  display_year: new Date().getFullYear(),
+  concessionaria_nombre: '',
+  concessionaria_telefono: '',
+  concessionaria_email: '',
+  nutricionista_nombre: '',
+  nutricionista_telefono: ''
+});
 
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const day = d.getDay();
-    if (day >= 1 && day <= 5) {
-      result.push(formatDateKey(d));
-    }
-  }
+const generateMonthDates = (month: number, year: number) => {
+  const totalDays = new Date(year, month, 0).getDate();
+  return Array.from({ length: totalDays }, (_, index) => {
+    const date = new Date(year, month - 1, index + 1);
+    return formatDateKey(date);
+  });
+};
 
-  return result;
+const getMonthLabel = (month: number, year: number) => `${monthNames[month - 1]} ${year}`;
+
+const buildMonthDisplayItems = (month: number, year: number, rows: MenuItem[]) => {
+  const monthDates = generateMonthDates(month, year);
+  const map = new Map(rows.map((item) => [item.menu_date, item]));
+
+  return monthDates.map((dateKey) => {
+    const existing = map.get(dateKey);
+    if (existing) return existing;
+
+    return {
+      menu_year: year,
+      menu_month: month,
+      menu_date: dateKey,
+      menu_text: '',
+      price: null
+    };
+  }).sort((a, b) => (a.menu_date > b.menu_date ? 1 : -1));
 };
 
 const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
-  const [settings, setSettings] = useState<MenuSettings>({
-    id: 1,
-    title: `Menú ${monthNames[new Date().getMonth()]} ${new Date().getFullYear()}`,
-    display_month: new Date().getMonth() + 1,
-    display_year: new Date().getFullYear(),
-    concessionaria_nombre: '',
-    concessionaria_telefono: '',
-    concessionaria_email: '',
-    nutricionista_nombre: '',
-    nutricionista_telefono: ''
-  });
+  const [settings, setSettings] = useState<MenuSettings>(getDefaultSettings());
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -119,6 +134,61 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
     setAutoSaveTimeout(timeout);
   }, [autoSaveTimeout, autoSaveSettings]);
 
+  const ensureMonthItems = useCallback(async (month: number, year: number) => {
+    const dates = generateMonthDates(month, year);
+    const { data: existingRows, error: existingError } = await supabase
+      .from('casino_menu_items')
+      .select('menu_date')
+      .eq('menu_year', year)
+      .eq('menu_month', month);
+
+    if (existingError) throw existingError;
+
+    const existingDates = new Set((existingRows || []).map((item) => item.menu_date));
+    const missingDates = dates
+      .filter((date) => !existingDates.has(date))
+      .map((date) => ({
+        menu_year: year,
+        menu_month: month,
+        menu_date: date,
+        menu_text: '',
+        price: null
+      }));
+
+    if (missingDates.length > 0) {
+      const { error: insertError } = await supabase
+        .from('casino_menu_items')
+        .insert(missingDates);
+
+      if (insertError) throw insertError;
+    }
+
+    if (dates.length > 0) {
+      const lastDate = dates[dates.length - 1];
+      const lastDayNumber = Number(lastDate.slice(-2));
+      const monthEnd = new Date(year, month, 0).getDate();
+
+      if (lastDayNumber !== monthEnd) {
+        const missingFinalDay = formatDateKey(new Date(year, month - 1, monthEnd));
+        const finalDayExists = existingDates.has(missingFinalDay);
+
+        if (!finalDayExists) {
+          const { error: finalDayError } = await supabase
+            .from('casino_menu_items')
+            .insert({
+              menu_year: year,
+              menu_month: month,
+              menu_date: missingFinalDay,
+              menu_text: '',
+              price: null
+            });
+
+          if (finalDayError) throw finalDayError;
+        }
+      }
+    }
+  }, []);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -126,12 +196,13 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
         .from('casino_menu_settings')
         .select('*')
         .eq('id', 1)
-        .single();
+        .maybeSingle();
 
-      if (settingsRes.error && settingsRes.error.code !== 'PGRST116') throw settingsRes.error;
+      if (settingsRes.error) throw settingsRes.error;
 
-      const resolvedSettings = settingsRes.data || settings;
+      const resolvedSettings = settingsRes.data || getDefaultSettings();
       setSettings(resolvedSettings);
+      await ensureMonthItems(resolvedSettings.display_month, resolvedSettings.display_year);
 
       const itemsRes = await supabase
         .from('casino_menu_items')
@@ -151,8 +222,8 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
   };
 
   const sortedItems = useMemo(
-    () => [...menuItems].sort((a, b) => (a.menu_date > b.menu_date ? 1 : -1)),
-    [menuItems]
+    () => buildMonthDisplayItems(settings.display_month, settings.display_year, menuItems),
+    [menuItems, settings.display_month, settings.display_year]
   );
 
   const loadMonthItems = async (month: number, year: number) => {
@@ -164,35 +235,40 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
       .order('menu_date', { ascending: true });
 
     if (error) throw error;
-    setMenuItems(data || []);
+
+    const monthRows = buildMonthDisplayItems(month, year, data || []);
+    setMenuItems(monthRows as MenuItem[]);
   };
 
   const handleGenerateWorkdays = async () => {
     try {
-      const dates = generateWeekdays(settings.display_month, settings.display_year);
-      const existing = new Set(menuItems.map((item) => item.menu_date));
-
-      const missing = dates
-        .filter((date) => !existing.has(date))
-        .map((date) => ({
-          menu_year: settings.display_year,
-          menu_month: settings.display_month,
-          menu_date: date,
-          menu_text: '',
-          price: null
-        }));
-
-      if (missing.length > 0) {
-        const { error } = await supabase.from('casino_menu_items').insert(missing);
-        if (error) throw error;
-      }
-
+      await ensureMonthItems(settings.display_month, settings.display_year);
       await loadMonthItems(settings.display_month, settings.display_year);
-      setMessage('Días hábiles generados correctamente');
+      const lastDay = new Date(settings.display_year, settings.display_month, 0).getDate();
+      setMessage(`Días del mes añadidos correctamente. El mes tiene ${lastDay} días y ya quedó listo hasta ${formatDateKey(new Date(settings.display_year, settings.display_month - 1, lastDay))}.`);
     } catch (error) {
-      console.error('Error generating workdays:', error);
-      setMessage('Error al generar días hábiles');
+      console.error('Error adding month days:', error);
+      setMessage('Error al añadir los días del mes');
     }
+  };
+
+  const handleSaveItems = async (itemsToSave: MenuItem[] = sortedItems) => {
+    if (!itemsToSave.length) return;
+
+    const payload = itemsToSave.map((item) => ({
+      id: item.id,
+      menu_year: item.menu_year || settings.display_year,
+      menu_month: item.menu_month || settings.display_month,
+      menu_date: item.menu_date,
+      menu_text: item.menu_text || '',
+      price: item.price ?? null
+    }));
+
+    const { error } = await supabase
+      .from('casino_menu_items')
+      .upsert(payload, { onConflict: 'menu_year,menu_month,menu_date' });
+
+    if (error) throw error;
   };
 
   const handleSaveSettings = async () => {
@@ -210,53 +286,23 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
         nutricionista_telefono: settings.nutricionista_telefono || null
       };
 
-      const { error } = await supabase
+      const { error: settingsError } = await supabase
         .from('casino_menu_settings')
         .upsert(payload, { onConflict: 'id' });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (settingsError) {
+        console.error('Supabase settings error:', settingsError);
+        throw settingsError;
       }
 
+      await ensureMonthItems(settings.display_month, settings.display_year);
+      await handleSaveItems(sortedItems);
       await loadMonthItems(settings.display_month, settings.display_year);
-      setMessage('✓ Configuración del menú guardada correctamente');
+      setMessage('✓ Configuración y días del menú guardados correctamente');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
       setMessage('❌ Error al guardar la configuración. Intenta de nuevo.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveItems = async () => {
-    setSaving(true);
-    try {
-      const payload = sortedItems.map((item) => ({
-        id: item.id,
-        menu_year: settings.display_year,
-        menu_month: settings.display_month,
-        menu_date: item.menu_date,
-        menu_text: item.menu_text || '',
-        price: item.price ?? null
-      }));
-
-      const { error } = await supabase
-        .from('casino_menu_items')
-        .upsert(payload, { onConflict: 'menu_year,menu_month,menu_date' });
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      await loadMonthItems(settings.display_month, settings.display_year);
-      setMessage('✓ Calendario de menú guardado correctamente');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error saving menu items:', error);
-      setMessage('❌ Error al guardar los días del menú. Intenta de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -295,9 +341,9 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <UtensilsCrossed className="w-10 h-10 text-orange-600" /> Gestión de Menú Casino
+              <UtensilsCrossed className="w-10 h-10 text-orange-600" /> Gestión del menú
             </h1>
-            <p className="text-gray-600">Calendario editable mensual, sin subir Word/PDF.</p>
+            <p className="text-gray-600">Edita el título, el mes visible y el calendario del casino.</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -305,14 +351,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
               disabled={saving || loading}
               className="bg-orange-600 text-white px-5 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
-              <Save className="w-5 h-5" /> Guardar configuración
-            </button>
-            <button
-              onClick={handleSaveItems}
-              disabled={saving || loading}
-              className="bg-indigo-600 text-white px-5 py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              <Save className="w-5 h-5" /> Guardar calendario
+              <Save className="w-5 h-5" /> Guardar cambios
             </button>
           </div>
         </div>
@@ -344,7 +383,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-5">
-                  <label className="block text-sm text-gray-600 mb-1">Título</label>
+                  <label className="block text-sm text-gray-600 mb-1">Título del menú</label>
                   <input
                     type="text"
                     value={settings.title}
@@ -360,6 +399,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                       const month = Number(e.target.value);
                       const newSettings = { ...settings, display_month: month };
                       handleSettingsChange(newSettings);
+                      await ensureMonthItems(month, settings.display_year);
                       await loadMonthItems(month, settings.display_year);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
@@ -379,6 +419,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                       const newSettings = { ...settings, display_year: year };
                       handleSettingsChange(newSettings);
                       if (!Number.isNaN(year) && year > 1990) {
+                        await ensureMonthItems(settings.display_month, year);
                         await loadMonthItems(settings.display_month, year);
                       }
                     }}
@@ -386,12 +427,12 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm text-gray-600 mb-1">Acción</label>
+                  <label className="block text-sm text-gray-600 mb-1">Días</label>
                   <button
                     onClick={handleGenerateWorkdays}
                     className="w-full px-3 py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
                   >
-                    <Plus className="w-4 h-4" /> Generar días
+                    <Plus className="w-4 h-4" /> Añadir días
                   </button>
                 </div>
               </div>
@@ -446,19 +487,47 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
             </div>
 
             <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-2xl font-bold mb-5">Días del Menú ({monthNames[settings.display_month - 1]} {settings.display_year})</h2>
+              <h2 className="text-2xl font-bold mb-5">Días del menú · {getMonthLabel(settings.display_month, settings.display_year)}</h2>
 
               <div className="space-y-4">
                 {sortedItems.length > 0 ? (
                   sortedItems.map((item) => (
-                    <div key={item.menu_date} className="border border-gray-200 rounded-lg p-4">
+                    <div key={item.menu_date} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                      <div className="mb-3 flex justify-end">
+                        <button
+                          onClick={() => handleDeleteItem(item)}
+                          disabled={!item.id}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            item.id
+                              ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                         <div className="md:col-span-2">
                           <label className="block text-sm text-gray-600 mb-1">Fecha</label>
                           <input
                             type="date"
                             value={item.menu_date}
-                            onChange={(e) => setMenuItems((prev) => prev.map((it) => it.menu_date === item.menu_date ? { ...it, menu_date: e.target.value } : it))}
+                            onChange={(e) => setMenuItems((prev) => {
+                              const existing = prev.find((it) => it.menu_date === item.menu_date);
+                              const nextItem = {
+                                ...item,
+                                menu_date: e.target.value,
+                                menu_year: Number(e.target.value.slice(0, 4)),
+                                menu_month: Number(e.target.value.slice(5, 7))
+                              };
+
+                              if (existing) {
+                                return prev.map((it) => it.menu_date === item.menu_date ? nextItem : it);
+                              }
+
+                              return [...prev, nextItem];
+                            })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                           />
                         </div>
@@ -471,7 +540,7 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                             placeholder={'Salad Bar\nPlato principal\nPostre'}
                           />
                         </div>
-                        <div className="md:col-span-1">
+                        <div className="md:col-span-2">
                           <label className="block text-sm text-gray-600 mb-1">Precio</label>
                           <input
                             type="number"
@@ -486,14 +555,6 @@ const CasinoManagement: React.FC<CasinoManagementProps> = ({ onBack }) => {
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                           />
-                        </div>
-                        <div className="md:col-span-1 flex items-end">
-                          <button
-                            onClick={() => handleDeleteItem(item)}
-                            className="w-full px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
-                          >
-                            Eliminar
-                          </button>
                         </div>
                       </div>
                     </div>
