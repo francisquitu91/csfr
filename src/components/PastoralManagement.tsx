@@ -9,6 +9,7 @@ interface PastoralManagementProps {
 const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
   const [coreMembers, setCoreMembers] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [pastoralTeam, setPastoralTeam] = useState<any[]>([]);
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -16,8 +17,10 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
   const [success, setSuccess] = useState<string | null>(null);
   const [editingCore, setEditingCore] = useState<any>(null);
   const [editingTeacher, setEditingTeacher] = useState<any>(null);
+  const [editingPastoralMember, setEditingPastoralMember] = useState<any>(null);
   const [newCore, setNewCore] = useState({ name: '', order_index: 0, year: 2026 });
   const [newTeacher, setNewTeacher] = useState({ name: '', order_index: 0 });
+  const [newPastoralMember, setNewPastoralMember] = useState({ name: '', order_index: 0 });
 
   useEffect(() => {
     fetchData();
@@ -25,14 +28,16 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
 
   const fetchData = async () => {
     try {
-      const [coreRes, teachersRes, photosRes] = await Promise.all([
+      const [coreRes, teachersRes, photosRes, pastoralTeamRes] = await Promise.all([
         supabase.from('pastoral_core_members').select('*').order('order_index'),
         supabase.from('pastoral_teachers').select('*').order('order_index'),
-        supabase.from('pastoral_photos').select('*').order('order_index')
+        supabase.from('pastoral_photos').select('*').order('order_index'),
+        supabase.from('pastoral_team').select('*').order('order_index')
       ]);
       setCoreMembers(coreRes.data || []);
       setTeachers(teachersRes.data || []);
       setPhotos(photosRes.data || []);
+      setPastoralTeam(pastoralTeamRes.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -102,6 +107,40 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
     }
   };
 
+  const handleSavePastoralMember = async () => {
+    if (!editingPastoralMember && !newPastoralMember.name.trim()) return;
+    setSaving(true);
+    try {
+      const { error: saveError } = editingPastoralMember
+        ? await supabase.from('pastoral_team').update({
+            name: editingPastoralMember.name,
+            order_index: editingPastoralMember.order_index
+          }).eq('id', editingPastoralMember.id)
+        : await supabase.from('pastoral_team').insert([newPastoralMember]);
+      if (saveError) throw saveError;
+      setSuccess(editingPastoralMember ? 'Integrante actualizado' : 'Integrante agregado');
+      setEditingPastoralMember(null);
+      setNewPastoralMember({ name: '', order_index: 0 });
+      fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeletePastoralMember = async (id: string) => {
+    if (!confirm('¿Eliminar integrante del Equipo Pastoral?')) return;
+    try {
+      const { error: deleteError } = await supabase.from('pastoral_team').delete().eq('id', id);
+      if (deleteError) throw deleteError;
+      fetchData();
+      setSuccess('Integrante eliminado');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     setSaving(true);
@@ -163,6 +202,49 @@ const PastoralManagement: React.FC<PastoralManagementProps> = ({ onBack }) => {
                 <button onClick={() => handleDeletePhoto(p.id, p.photo_name)} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded opacity-0 group-hover:opacity-100">
                   <Trash2 className="w-4 h-4"/>
                 </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pastoral Team */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-4">Equipo Pastoral</h2>
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
+            <input
+              value={editingPastoralMember?.name ?? newPastoralMember.name}
+              onChange={(e) => editingPastoralMember
+                ? setEditingPastoralMember({ ...editingPastoralMember, name: e.target.value })
+                : setNewPastoralMember({ ...newPastoralMember, name: e.target.value })}
+              placeholder="Nombre completo"
+              className="px-4 py-2 border rounded"
+            />
+            <input
+              type="number"
+              value={editingPastoralMember?.order_index ?? newPastoralMember.order_index}
+              onChange={(e) => editingPastoralMember
+                ? setEditingPastoralMember({ ...editingPastoralMember, order_index: +e.target.value })
+                : setNewPastoralMember({ ...newPastoralMember, order_index: +e.target.value })}
+              placeholder="Orden"
+              className="px-4 py-2 border rounded"
+            />
+            <button onClick={handleSavePastoralMember} disabled={saving} className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+              {saving ? <Loader2 className="w-5 h-5 animate-spin"/> : <Save className="w-5 h-5"/>}<span>{editingPastoralMember ? 'Actualizar' : 'Agregar'}</span>
+            </button>
+          </div>
+          {editingPastoralMember && <button onClick={() => setEditingPastoralMember(null)} className="text-gray-600 mb-4">Cancelar</button>}
+          <div className="space-y-2">
+            {pastoralTeam.map(member => (
+              <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span>{member.name}</span>
+                <div className="flex space-x-2">
+                  <button onClick={() => setEditingPastoralMember(member)} className="text-red-600" aria-label={`Editar ${member.name}`}>
+                    <Edit2 className="w-5 h-5"/>
+                  </button>
+                  <button onClick={() => handleDeletePastoralMember(member.id)} className="text-red-600" aria-label={`Eliminar ${member.name}`}>
+                    <Trash2 className="w-5 h-5"/>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

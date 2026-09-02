@@ -58,8 +58,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onLogout })
     },
     {
       id: 'pastoral-management',
-      title: 'Gestión Pastoral Juvenil',
-      description: 'Administrar Pastoral Juvenil y fotos',
+      title: 'Gestión de Pastoral',
+      description: 'Administrar Equipo Pastoral, Pastoral Juvenil y fotos',
       icon: <Heart className="w-8 h-8" />,
       color: 'bg-pink-600 hover:bg-pink-700',
       iconBg: 'bg-pink-100 text-pink-600'
