@@ -33,7 +33,7 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
   const categories = [
     { id: 'all', name: 'Todos', color: 'blue' },
     { id: 'Documentos, protocolos y reglamentos del Colegio', name: 'Protocolos y Reglamentos', color: 'purple' },
-    { id: 'Documentos de Matrícula 2026', name: 'Matrícula 2026', color: 'green' },
+    { id: 'Matrícula', name: 'Matrícula', color: 'green' },
     { id: 'Seguros escolares', name: 'Seguros Escolares', color: 'orange' },
     { id: 'Otros', name: 'Otros', color: 'gray' }
   ];
@@ -91,22 +91,13 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
     setPreviewDocument(null);
   };
 
-  const MATR_2025 = 'Documentos de Matrícula 2025';
-  const MATR_2026 = 'Documentos de Matrícula 2026';
-
   let filteredDocuments: Document[] = documents;
   if (activeCategory !== 'all') {
-    if (activeCategory === MATR_2026) {
-      // Treat 2025 and 2026 as the same category in the UI so existing documents appear under 2026
-      filteredDocuments = documents.filter(doc => doc.category === MATR_2026 || doc.category === MATR_2025);
-    } else {
-      filteredDocuments = documents.filter(doc => doc.category === activeCategory);
-    }
+    filteredDocuments = documents.filter(doc => doc.category === activeCategory);
   }
 
   const groupedDocuments = filteredDocuments.reduce((acc, doc) => {
-    // Normalize old 2025 category to 2026 for display/grouping
-    const key = doc.category === MATR_2025 ? MATR_2026 : doc.category;
+    const key = doc.category;
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -117,7 +108,7 @@ const InstitutionalDocuments: React.FC<InstitutionalDocumentsProps> = ({ onBack 
   // Define el orden de las categorías
   const categoryOrder = [
     'Documentos, protocolos y reglamentos del Colegio',
-    'Documentos de Matrícula 2026',
+    'Matrícula',
     'Seguros escolares',
     'Otros'
   ];

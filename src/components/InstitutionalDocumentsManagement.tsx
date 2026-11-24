@@ -38,7 +38,7 @@ interface DocumentForm {
 }
 
 const emptyFormData: DocumentForm = {
-  category: 'Documentos de Matrícula 2026',
+  category: 'Matrícula',
   title: '',
   description: '',
   file: null,
@@ -77,7 +77,7 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
   const [formData, setFormData] = useState<DocumentForm>(emptyFormData);
 
   const categories = [
-    'Documentos de Matrícula 2026',
+    'Matrícula',
     'Documentos, protocolos y reglamentos del Colegio',
     'Seguros escolares',
     'Otros'
@@ -246,7 +246,7 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
       // Reset form
       setFormData({
         ...emptyFormData,
-        category: 'Documentos de Matrícula 2026'
+        category: 'Matrícula'
       });
       setIsEditing(false);
       setEditingId(null);
@@ -304,7 +304,7 @@ const InstitutionalDocumentsManagement: React.FC<InstitutionalDocumentsManagemen
   const handleCancel = () => {
     setFormData({
       ...emptyFormData,
-      category: 'Documentos de Matrícula 2026'
+      category: 'Matrícula'
     });
     setIsEditing(false);
     setEditingId(null);
